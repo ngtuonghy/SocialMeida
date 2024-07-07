@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "@styled/typescript-styled-plugin"
+      }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src/*"]
+    }
+  }
+}

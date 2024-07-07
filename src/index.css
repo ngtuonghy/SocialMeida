@@ -1,0 +1,189 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+  /* background: var(--color-background); */
+}
+
+body {
+  overflow-y: scroll;
+}
+:root {
+  font-family: "Poppins", sans-serif;
+  --color-primary: var(--color-teal-1);
+  --color-secondary: var(--color-teal-6);
+
+  /* --color-background: #f6f6f6; */
+  --color-background: white;
+  --color-foreground: #003cff;
+
+  --color-border: #e0e0e0;
+  --color-primary-text: #0a0a0a;
+  --color-secondary-text: #ffffff;
+  --toggle-bg: #ffffff;
+  --toggle-fg: #000000;
+
+  --color-text-link: var(--color-teal-3);
+  --color-background-hover: #eeeeee;
+  /* --color-text-link-hover: var(--color-twitch-purple-8); */
+  /* --color-text-link-active: var(--color-twitch-purple-7); */
+  /* --color-text-link-focus: var(--color-twitch-purple-8); */
+  --color-red-1: #050101;
+  --color-red-2: #120202;
+  --color-red-3: #200404;
+  --color-red-4: #3c0807;
+  --color-red-5: #530a09;
+  --color-red-6: #6e0e0c;
+  --color-red-7: #971311;
+  --color-red-8: #bb1411;
+  --color-red-9: #eb0400;
+  --color-red-10: #ff4f4d;
+  --color-red-11: #ff8280;
+  --color-red-12: #ffaaa8;
+  --color-red-13: #ffcdcc;
+  --color-red-14: #ffdcdb;
+  --color-red-15: #ffe6e5;
+
+  --color-teal-1: #00adb5; /* màu gốc */
+  --color-teal-2: #009fa9;
+  --color-teal-3: #00939c;
+  --color-teal-4: #00878f;
+  --color-teal-5: #007b82;
+  --color-teal-6: #006f75;
+  --color-teal-7: #006369;
+  --color-teal-8: #00575c;
+  --color-teal-9: #004b4f;
+  --color-teal-10: #003f42;
+  --color-teal-11: #003335;
+  --color-teal-12: #002828;
+  --color-teal-13: #001c1b;
+  --color-teal-14: #00100e;
+  --color-teal-15: #000402;
+
+  --border-radius-none: 0;
+  --border-radius-small: 0.2rem;
+  --border-radius-medium: 0.4rem;
+  --border-radius-large: 0.6rem;
+  --border-radius-extra-large: 1rem;
+  --border-radius-extra-extra-large: 1.6rem;
+  --border-radius-rounded: 9000px;
+
+  --color-opac-gl-1: rgba(173, 173, 184, 0.22);
+  --color-opac-gl-2: rgba(173, 173, 184, 0.35);
+  --color-opac-gl-3: rgba(173, 173, 184, 0.43);
+
+  --font-size-1: 5.4rem;
+  --font-size-2: 3.6rem;
+  --font-size-3: 2.4rem;
+  --font-size-4: 1.8rem;
+  --font-size-5: 1.4rem;
+  --font-size-6: 1.3rem;
+  --font-size-7: 1.2rem;
+  --font-size-8: 1.2rem;
+
+  --header-height: 50px;
+  --color-border-input: #d9d9d9;
+
+  --speed: 500ms;
+  --max-width: 1250px;
+  /*new css*/
+
+  --color-background-body: var(--color-grey-2);
+  --color-background-base: var(--color-white);
+
+  --color-text-link: var(--color-primary-5);
+  --color-text-link-hover: var(--color-primary-6);
+  --color-primary-50: #efeffd;
+  --color-primary-100: #dedefa;
+  --color-primary-200: #bebdf6;
+  --color-primary-300: #9d9bf1;
+  --color-primary-400: #7d7aed;
+  --color-primary-500: #5c59e8;
+  --color-primary-600: #4543ae;
+  --color-primary-700: #2e2d74;
+  --color-primary-800: #17163a;
+  --color-primary-900: #090917;
+
+  --color-green-1: #d4f7dc;
+  --color-green-5: #0d894f;
+
+  --color-yellow-5: #e46a11;
+
+  --color-red-5: #f04438;
+
+  --color-blue-5: #13b2e4;
+
+  --color-gray-100: #e0e2e7;
+  --color-gray-200: #c2c6ce;
+  --color-gray-300: #a3a9b6;
+  --color-gray-400: #858d9d;
+  --color-black-500: #667085;
+  --color-black-600: #4d5464;
+  --color-black-700: #333843;
+  --color-black-800: #1a1c21;
+  --color-black-900: #0a0b0d;
+
+  --color-white: #ffffff;
+}
+[data-theme="dark"] {
+  --background-color: #0a0a0a;
+  --foreground-color: #567aff;
+  --primary-text-color: #f6f6f6;
+  --secondary-text-color: #0a0a0a;
+  --toggle-bg: #283452;
+  --toggle-fg: var(--color-primary);
+}
+a {
+  color: var(--color-text-link);
+  text-decoration: none;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(15deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(-15deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.haha-svg {
+  width: 100px; /* Điều chỉnh kích thước SVG tùy ý */
+  height: 100px;
+  animation: spin 2s infinite; /* Thời gian và kiểu lặp của animation */
+}
+
+/* CSSTransition classes  */
+.menu-primary-enter {
+  position: absolute;
+  transform: translateX(-110%);
+}
+.menu-primary-enter-active,
+.menu-secondary-enter-active {
+  transform: translateX(0%);
+  transition: all var(--speed) ease;
+}
+.menu-primary-exit {
+  position: absolute;
+}
+.menu-primary-exit-active {
+  transform: translateX(-110%);
+  transition: all var(--speed) ease;
+}
+.menu-secondary-enter {
+  transform: translateX(110%);
+}
+.menu-secondary-exit-active {
+  transform: translateX(110%);
+  transition: all var(--speed) ease;
+}

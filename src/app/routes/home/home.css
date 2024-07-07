@@ -1,0 +1,21 @@
+.home {
+  /* margin-inline: 10px; */
+}
+.home__profile {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  padding: 10px;
+  border-block: 1px solid var(--color-border);
+  align-items: center;
+  /* border-radius: var(--border-radius-medium); */
+}
+
+.home__avatar {
+  outline: 1px solid var(--color-border);
+  border-radius: var(--border-radius-rounded);
+  width: 100%;
+  height: 100%;
+  max-width: 40px;
+  max-height: 40px;
+}
