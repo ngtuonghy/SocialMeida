@@ -1,30 +1,48 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { getProfile } from "./api/user-api";
+import Cookies from "js-cookie";
+
+export const fetchUserById = createAsyncThunk(
+	"user/login",
+	async (_, thunkAPI) => {
+		const userId = Cookies.get("userId"); // Lấy userId từ cookie
+		const response = await getProfile(userId);
+		// console.log(thunkAPI);
+		return response.data.user;
+	},
+);
 
 const initialState = {
-  user: null,
+	data: null,
+	loading: false,
 };
 
 export const userSlice = createSlice({
-  name: "user",
-  initialState,
-  reducers: {
-    updateUser: (state, action) => {
-      // Redux Toolkit allows us to write "mutating" logic in reducers. It
-      // doesn't actually mutate the state because it uses the Immer library,
-      // which detects changes to a "draft state" and produces a brand new
-      // immutable state based off those changes
-      state.user = action.payload;
-    },
-    // decrement: (state) => {
-    //   state.value -= 1;
-    // },
-    // incrementByAmount: (state, action) => {
-    //   state.value += action.payload;
-    // },
-  },
+	name: "user",
+	initialState,
+	reducers: {
+		// decrement: (state) => {
+		//   state.value -= 1;
+		// },
+		// incrementByAmount: (state, action) => {
+		//   state.value += action.payload;
+		// },
+	},
+	extraReducers: (builder) => {
+		builder.addCase(fetchUserById.fulfilled, (state, action) => {
+			state.data = action.payload;
+			state.loading = false;
+		});
+		builder.addCase(fetchUserById.pending, (state) => {
+			state.loading = true;
+		});
+		builder.addCase(fetchUserById.rejected, (state) => {
+			state.loading = false;
+		});
+	},
 });
 
 // Action creators are generated for each case reducer function
-export const { updateUser } = userSlice.actions;
+export const {} = userSlice.actions;
 
 export default userSlice.reducer;

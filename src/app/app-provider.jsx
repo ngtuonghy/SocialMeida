@@ -1,10 +1,15 @@
 import { Provider } from "react-redux";
 import ContextProvider from "~/context";
-import { store } from "~/store";
+import { ReduxStore } from "~/stores/redux-store";
+import { Suspense } from "react";
+import Notification from "~/components/ui/notification/notification";
 export const AppProvider = ({ children }) => {
-  return (
-    <ContextProvider>
-      <Provider store={store}>{children}</Provider>
-    </ContextProvider>
-  );
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<Notification />
+			<ContextProvider>
+				<Provider store={ReduxStore}>{children}</Provider>
+			</ContextProvider>
+		</Suspense>
+	);
 };

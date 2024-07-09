@@ -1,16 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
-import SideBarLeft from "~/components/SideBar/SideBarLeft";
-import SideBarRight from "~/components/SideBar/SideBarRight";
+import SideBarLeft from "~/components/layouts/sidebar-Left";
+import SideBarRight from "~/components/layouts/sidebar-right";
 
 import "./Layout.css";
 
 import { useViewport } from "~/context/viewportContext";
 import { render } from "react-dom";
 const Layout = ({ children }) => {
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
-  const [rerender, setRerender] = useState(false);
-  const { width } = useViewport();
-  /*  const mainRef = useRef(null);
+	const [isSmallScreen, setIsSmallScreen] = useState(false);
+	const [rerender, setRerender] = useState(false);
+	const { width } = useViewport();
+	/*  const mainRef = useRef(null);
   // useEffect(() => {
   //   setRerender((prev) => !prev);
   // }, []);
@@ -39,27 +39,27 @@ const Layout = ({ children }) => {
 
   }, [width]);
   */
-  // console.log("check render", width);
-  return (
-    <>
-      <main className="layout__main">
-        <div className="layout__left">
-          <SideBarLeft />
-        </div>
-        <div
-          style={{ width: "100%", height: "100%" }}
-          className="layout__content"
-        >
-          {children}
-        </div>
-        {width > 800 && (
-          <div className="layout__right">
-            <SideBarRight />
-          </div>
-        )}
-      </main>
-    </>
-  );
+	// console.log("check render", width);
+	return (
+		<>
+			<main className="layout__main">
+				<div className="layout__left">
+					<SideBarLeft />
+				</div>
+				<div
+					style={{ width: "100%", height: "100%" }}
+					className="layout__content"
+				>
+					{children}
+				</div>
+				{width > 800 && (
+					<div className="layout__right">
+						<SideBarRight />
+					</div>
+				)}
+			</main>
+		</>
+	);
 };
 
 export default Layout;
