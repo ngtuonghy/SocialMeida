@@ -6,9 +6,9 @@ export const fetchUserById = createAsyncThunk(
 	"user/login",
 	async (_, thunkAPI) => {
 		const userId = Cookies.get("userId"); // Lấy userId từ cookie
+		if (!userId) return null;
 		const response = await getProfile(userId);
-		// console.log(thunkAPI);
-		return response.data.user;
+		return response.data;
 	},
 );
 
@@ -20,14 +20,7 @@ const initialState = {
 export const userSlice = createSlice({
 	name: "user",
 	initialState,
-	reducers: {
-		// decrement: (state) => {
-		//   state.value -= 1;
-		// },
-		// incrementByAmount: (state, action) => {
-		//   state.value += action.payload;
-		// },
-	},
+	reducers: {},
 	extraReducers: (builder) => {
 		builder.addCase(fetchUserById.fulfilled, (state, action) => {
 			state.data = action.payload;

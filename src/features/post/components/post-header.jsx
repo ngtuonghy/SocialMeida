@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import React, { useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import styled from "styled-components";
@@ -6,12 +5,12 @@ import Avatar from "~/components/ui/avatar/avatar";
 import { IconButton } from "~/components/ui/button/icon-button";
 import { formatTime } from "~/utils/utilTime";
 import { Link } from "react-router-dom";
-import {
-  MdOutlineDelete,
-  MdOutlineModeEdit,
-  MdOutlinePushPin,
-} from "react-icons/md";
-import { deletePost, updateReaction, getPostById, getPost } from "../api/post";
+import { MdOutlineDelete, MdOutlineModeEdit } from "react-icons/md";
+import { deletePost } from "../api/post";
+import Popover from "~/components/ui/pop-over/pop-over";
+import { IoEyeOffOutline } from "react-icons/io5";
+import Cookies from "js-cookie";
+
 const BoxHeader = styled.div`
   display: flex;
   align-items: center;
@@ -38,50 +37,97 @@ const BoxLeft = styled.div`
   align-items: center;
   gap: 10px;
 `;
-const PostHeader = ({ post }) => {
-  const [postAction, setPostAction] = useState(false);
-  const handleThreeDots = async (e) => {
-    postAction === e ? setPostAction(null) : setPostAction(e);
-  };
+const PostHeader = ({ post, setShowPost, setPosts }) => {
+	const [postAction, setPostAction] = useState(false);
+	const handleThreeDots = async (e) => {
+		postAction === e ? setPostAction(null) : setPostAction(e);
+	};
 
-  return (
-    <BoxHeader>
-      <BoxLeft>
-        <Avatar src={post.avatar_url} to={`/${post.username}`} />
-        <BoxItemHeader>
-          <SLink to={`/${post.username}`}>{post.name}</SLink>
-          <Time>{formatTime(post.created_at)}</Time>
-        </BoxItemHeader>
-      </BoxLeft>
-      <IconButton onClick={() => handleThreeDots(!postAction)}>
-        <BsThreeDots size={20} />
-      </IconButton>
-      {postAction && Cookies.get("userId") === post.user_id && (
-        <div className="post__custom">
-          <div className="post__custom-item">
-            <MdOutlinePushPin size={20} />
-            <p>Pin post</p>
-          </div>
-          <div
-            className="post__custom-item"
-            onClick={() => handleEditPost(post.post_id)}
-          >
-            <MdOutlineModeEdit size={20} />
-            <p>Edit post</p>
-          </div>
-          <div
-            className="post__custom-item"
-            onClick={async () => {
-              deletePost(post.post_id);
-            }}
-          >
-            <MdOutlineDelete color="red" size={20} />
-            <p style={{ color: "red" }}>Delete</p>
-          </div>
-        </div>
-      )}
-    </BoxHeader>
-  );
+	return (
+		<BoxHeader>
+			<BoxLeft>
+				<Avatar src={post.avatarUrl} to={`/${post.username}`} />
+				<BoxItemHeader>
+					<SLink to={`/${post.username}`}>{post.name}</SLink>
+					<Time>{formatTime(post.createdAt)}</Time>
+				</BoxItemHeader>
+			</BoxLeft>
+			<IconButton onClick={() => handleThreeDots(!postAction)}>
+				<Popover
+					buttonContent={
+						<IconButton>
+							<BsThreeDots size={20} />
+						</IconButton>
+					}
+				>
+					<ItemMenu post={post} setShowPost={setShowPost} setPosts={setPosts} />
+				</Popover>
+			</IconButton>
+		</BoxHeader>
+	);
 };
 
 export default PostHeader;
+const Item = styled.div`
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 7px 22px;
+  gap: 10px;
+  justify-content: start;
+  border-radius: var(--border-radius-small);
+  &:hover {
+    background-color: var(--color-gray-100);
+  }
+`;
+const ItemText = styled.p`
+  font-size: 15px;
+  font-weight: 400;
+`;
+const ItemMenu = ({ post, setShowPost, setPosts }) => {
+	const items = [
+		{
+			icon: <IoEyeOffOutline size={20} />,
+			text: "Hide",
+			auth: false,
+			onclick: () => {
+				setShowPost(false);
+			},
+		},
+		{
+			icon: <MdOutlineModeEdit size={20} />,
+			text: "Edit",
+			auth: true,
+			onclick: () => {
+				console.log("Edit");
+			},
+		},
+		{
+			icon: <MdOutlineDelete size={20} color="red" />,
+			text: "Delete",
+			auth: true,
+			onclick: async () => {
+				await deletePost({ postId: post.postId });
+
+				setPosts((prev) => prev.filter((item) => item.postId !== post.postId));
+			},
+		},
+	];
+
+	return (
+		<div>
+			{items.map((item, index) => {
+				if (item.auth && post.userId !== Cookies.get("userId")) {
+					return null;
+				}
+				return (
+					<Item onClick={item.onclick} key={index}>
+						{item.icon}
+						<ItemText>{item.text}</ItemText>
+					</Item>
+				);
+			})}
+		</div>
+	);
+};

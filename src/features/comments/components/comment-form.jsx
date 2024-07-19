@@ -1,19 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useViewport } from "~/context/viewportContext";
 import { convertFileToDataURL } from "~/utils/utilFile";
 import { LuImage, LuSendHorizonal, LuSmile, LuXCircle } from "react-icons/lu";
 import PickerEmoji from "~/lib/picker-emoji";
-import { generatePublicId } from "~/utils/utilCreateNanoId";
 import InputMultiline from "~/components/ui/text-field/input-multiline";
 import { IconButton } from "~/components/ui/button/icon-button";
-import { createComment, createNotification } from "../api/comment";
-import { socket } from "~/socket";
-import { useSelector } from "react-redux";
-import env from "~/config/env";
 import styled, { css } from "styled-components";
 import useUser from "~/hooks/use-user";
-import { uploadFiles } from "~/features/post/api/uploadImage";
-const homeUrl = env.homePort;
+import { useComments } from "../contexts/CommentsContext";
+import { addComment, addReplyComment } from "../helpers/create-comment";
 
 const SBox = styled.div`
   display: flex;
@@ -40,115 +35,22 @@ const BoxAction = styled.div`
           right: 0;
         `};
 `;
-const InputItem = ({ post, comment, setDataReplied }) => {
-	const postId = post ? post.post_id : comment.post_id;
+const CommentForm = ({ post, comment, setComment }) => {
+	const { setComments } = useComments();
+	const user = useUser();
 	const [dataInput, setDataInput] = useState({
 		text: "",
 		media: { url: null, type: null, file: null },
 	});
-
-	const user = useUser();
 	const { width } = useViewport();
 	const fileInputRef = useRef(null);
 
 	const handlePostComment = async () => {
-		const commentId = generatePublicId(25);
-		let url = null;
-		if (dataInput.media.url !== null) {
-			const response = await uploadFiles(
-				dataInput.media.file,
-				"up_comment",
-				`${commentId}_media`,
-			);
-			url = await response.json().then((res) => res.url);
+		if (post) {
+			await addComment(dataInput, post, user, setComments);
 		}
-
-		await createComment({
-			postId: postId,
-			commentId: commentId,
-			replyComment: comment ? comment.comment_id : null,
-			text: dataInput.text,
-			mediaUrl: url,
-			mediaType: dataInput.media.type,
-		});
-
-		// console.log(comment);
 		if (comment) {
-			const text = "replied to the comment";
-			const url = `${homeUrl}posts/${postId}?commentId=${commentId}&reply=${comment.comment_id}`;
-			if (comment.user_id !== user.user_id) {
-				await createNotification({
-					userId: comment.user_id,
-					createdByUserId: user.user_id,
-					notificationId: generatePublicId(24),
-					text: `${text} "${comment.text}"`,
-					url: url,
-					urlType: "commented",
-				});
-				socket.emit("send-notification", {
-					receiverId: comment.user_id,
-					data: {
-						avatar_url: user.avatar_url,
-						notificationId: generatePublicId(24),
-						text: `${user.name} ${text} "${comment.text}"`,
-						url: url,
-						urlType: "commented",
-					},
-				});
-			}
-			// socket.off("replied-comment");
-			socket.emit("replied-comment", {
-				avatar_url: user.avatar_url,
-				created_at: new Date().toISOString(),
-				name: user.name,
-				post_id: comment.post_id,
-				replyComment: comment.comment_id,
-				comment_id: commentId,
-				text: dataInput.text,
-				media_url: url,
-				media_type: dataInput.media.type,
-			});
-		} else {
-			if (post.user_id !== user.user_id) {
-				const text = "commented on your post";
-				// http://localhost:5173/home/posts/:idpost/?commentId={id}&reply={id}
-				const url = `${homeUrl}posts/${postId}?commentId=${commentId}`;
-				// console.log(post);
-				await createNotification({
-					userId: post.user_id,
-					createdByUserId: user.user_id,
-					notificationId: generatePublicId(24),
-					text: `${text} "${post.text}"`,
-					url: url,
-					urlType: "commented",
-				});
-				socket.emit("send-notification", {
-					receiverId: post.user_id,
-					data: {
-						avatar_url: user.avatar_url,
-						notificationId: generatePublicId(24),
-						text: `${user.name} ${text} "${post.text}"`,
-						url: url,
-						urlType: "commented",
-					},
-				});
-			}
-			// console.log("chek handle run");
-			// console.log(user);
-			// socket.off("new-comment");
-			socket.emit("new-comment", {
-				comment_id: commentId,
-				avatar_url: user.avatar_url,
-				created_at: new Date().toISOString(),
-				name: user.name,
-				post_id: post.post_id,
-				replyComment: post.comment_id,
-				text: dataInput.text,
-				media_url: url,
-				media_type: dataInput.media.type,
-				user_id: user.user_id,
-				username: user.name,
-			});
+			await addReplyComment(dataInput, comment, user, setComment);
 		}
 
 		setDataInput({
@@ -157,7 +59,6 @@ const InputItem = ({ post, comment, setDataReplied }) => {
 		});
 	};
 
-	// console.log(post);
 	const handleFileDataComment = (e) => {
 		convertFileToDataURL(e.target.files[0]).then((url) => {
 			setDataInput({
@@ -173,8 +74,7 @@ const InputItem = ({ post, comment, setDataReplied }) => {
 	const handleEmojiSelect = (emoji) => {
 		setDataInput({ ...dataInput, text: dataInput.text + emoji.native });
 	};
-	useEffect(() => {}, [dataInput]);
-	// console.log("state: focus", focusInput);
+
 	return (
 		<SBox>
 			<InputMultiline
@@ -282,4 +182,4 @@ const InputItem = ({ post, comment, setDataReplied }) => {
 		</SBox>
 	);
 };
-export default InputItem;
+export default CommentForm;

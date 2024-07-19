@@ -1,45 +1,47 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import "./comment.css";
 import CommentItem from "./comment-item";
-import { getComments } from "../api/comment";
 import { socket } from "~/socket";
 import InfiniteScroll from "react-infinite-scroll-component";
 import CommentLoading from "./comment-loading";
-import { isJsxNamespacedName } from "typescript";
+import { convertKeysToCamelCase } from "~/lib/change-case";
+import { useComments } from "../contexts/CommentsContext";
+
 const Comment = ({ post, commentId, scrollableTarget = null }) => {
-	const [commentArray, setCommentArray] = useState([]);
-	const [offset, setOffset] = useState(0);
-	const [hasMore, setHasMore] = useState(true); // Add hasMore state
+	const {
+		comments,
+		fetchData,
+		fetchMoreData,
+		hasMore,
+		setComments,
+		setHasMore,
+		setOffset,
+	} = useComments();
 
 	useEffect(() => {
-		if (post.post_id) fetchMoreData();
-	}, [post.post_id]);
+		fetchData({ postId: post.postId });
+		return () => {
+			setComments([]);
+			setHasMore(true);
+			setOffset(0);
+		};
+	}, []);
 
 	useEffect(() => {
 		const handleMessage = (data) => {
-			if (data.post_id !== post.post_id) return;
-			setCommentArray((prevDataComment) => {
+			console.log(data);
+			if (data.postId !== post.postId) return;
+			console.log(data);
+			setComments((prevDataComment) => {
 				const newComment = [data, ...prevDataComment];
 				return newComment;
 			});
 		};
-		socket.on("new-message", handleMessage);
+		socket.on("new-comment", handleMessage);
 		return () => {
-			socket.off("new-message", handleMessage);
+			socket.off("new-comment", handleMessage);
 		};
-	}, [post.post_id]);
-
-	// console.log(dataComment);
-	console.log("dataComment", commentArray);
-	const fetchMoreData = async () => {
-		await getComments(post.post_id, 10, offset, commentId).then((res) => {
-			if (res.code === 200) {
-				setCommentArray((d) => [...d, ...res.data]);
-				setOffset(offset + 10);
-				if (res.data.length <= 0) setHasMore(false);
-			}
-		});
-	};
+	}, []);
 
 	if (!post) return null;
 
@@ -47,19 +49,16 @@ const Comment = ({ post, commentId, scrollableTarget = null }) => {
 		<>
 			<InfiniteScroll
 				style={{ overflow: "hidden" }}
-				dataLength={commentArray.length}
-				next={fetchMoreData}
+				dataLength={comments.length}
+				next={() => {
+					fetchMoreData({ postId: post.postId });
+				}}
 				hasMore={hasMore}
 				loader={<CommentLoading />}
 				scrollableTarget={scrollableTarget}
 			>
-				{commentArray.map((comment, index) => (
-					<CommentItem
-						key={comment.comment_id}
-						comment={comment}
-						post={post}
-						setListComment={setCommentArray}
-					/>
+				{comments.map((comment, _) => (
+					<CommentItem key={comment.commentId} comment={comment} post={post} />
 				))}
 			</InfiniteScroll>
 		</>

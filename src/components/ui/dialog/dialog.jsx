@@ -22,7 +22,8 @@ const ModalContainer = styled.div`
   margin: auto;
   height: fit-content;
   width: 100%;
-  padding-block: 10px;
+  padding-top: 10px;
+padding-bottom: ${(props) => (props.hasFooter ? "10px" : "0")};
   border-radius: var(--border-radius-large);
   position: relative;
   display: flex;
@@ -71,8 +72,9 @@ const ModalBody = styled.div`
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  border-radius: var(--border-radius-large);
   position: relative;
-  margin-bottom: ${(props) => props.marginBottom || "0"};
+  margin-bottom: ${(props) => (props.hasFooter && props.marginBottom) || "0"};
 `;
 
 const ModalFooter = styled.footer`
@@ -111,88 +113,97 @@ const ContainerIcon = styled.div`
 `;
 
 const Dialog = ({
-  isOpen,
-  onClose,
-  children,
-  maxWidth,
-  maxHeight,
-  nodeHeaderLeft,
-  nodeHeaderRight,
-  nodeFooter,
-  title,
-  id,
+	isOpen,
+	onClose,
+	children,
+	maxWidth,
+	maxHeight,
+	headerContent,
+	footerContent,
+	title,
+	id,
 }) => {
-  useEffect(() => {
-    const closeOnEscapeKey = (e) => (e.key === "Escape" ? onClose() : null);
-    document.body.addEventListener("keydown", closeOnEscapeKey);
-    return () => {
-      document.body.removeEventListener("keydown", closeOnEscapeKey);
-    };
-  }, [onClose]);
-  const [marginBottom, setMarginBottom] = useState("0");
-  const footerRef = useRef(null);
+	useEffect(() => {
+		const closeOnEscapeKey = (e) => (e.key === "Escape" ? onClose() : null);
+		document.body.addEventListener("keydown", closeOnEscapeKey);
+		return () => {
+			document.body.removeEventListener("keydown", closeOnEscapeKey);
+		};
+	}, [onClose]);
+	const [marginBottom, setMarginBottom] = useState("0");
+	const footerRef = useRef(null);
 
-  useEffect(() => {
-    const updateMarginBottom = () => {
-      if (footerRef.current) {
-        setMarginBottom(`${footerRef.current.clientHeight - 10}px`);
-      }
-    };
+	useEffect(() => {
+		const updateMarginBottom = () => {
+			if (footerRef.current) {
+				setMarginBottom(`${footerRef.current.clientHeight - 10}px`);
+			}
+		};
 
-    if (isOpen) {
-      document.body.style.overflowY = "hidden";
-      updateMarginBottom();
-      const resizeObserver = new ResizeObserver(updateMarginBottom);
-      if (footerRef.current) {
-        resizeObserver.observe(footerRef.current);
-      }
-      return () => {
-        document.body.style.overflowY = "";
-        if (footerRef.current) {
-          resizeObserver.unobserve(footerRef.current);
-        }
-      };
-    } else {
-      document.body.style.overflowY = "";
-    }
-  }, [isOpen]);
+		if (isOpen) {
+			// document.body.style.overflowY = "hidden";
+			updateMarginBottom();
+			const resizeObserver = new ResizeObserver(updateMarginBottom);
+			if (footerRef.current) {
+				resizeObserver.observe(footerRef.current);
+			}
+			return () => {
+				// document.body.style.overflowY = "";
+				if (footerRef.current) {
+					resizeObserver.unobserve(footerRef.current);
+				}
+			};
+		}
+	}, [isOpen]);
 
-  if (!isOpen) return null;
-  return createPortal(
-    <Modal>
-      <ModalContainer maxWidth={maxWidth} maxHeight={maxHeight}>
-        <ModalHeader>
-          <HeaderLeft>
-            {nodeHeaderLeft}
-            <h3>{title}</h3>
-          </HeaderLeft>
-          {nodeHeaderRight}
-          {!nodeHeaderRight && (
-            <IconButton>
-              <IoMdClose onClick={onClose} size={30} />
-            </IconButton>
-          )}
-        </ModalHeader>
-        <ModalBody id={id} hasFooter={!!nodeFooter} marginBottom={marginBottom}>
-          {children}
-        </ModalBody>
-        {nodeFooter && <ModalFooter ref={footerRef}>{nodeFooter}</ModalFooter>}
-      </ModalContainer>
-    </Modal>,
-    document.getElementById("modal"),
-  );
+	if (!isOpen) return null;
+	return createPortal(
+		<Modal>
+			<ModalContainer
+				maxWidth={maxWidth}
+				maxHeight={maxHeight}
+				hasFooter={footerContent}
+			>
+				{headerContent ? (
+					<ModalHeader>{headerContent}</ModalHeader>
+				) : (
+					<ModalHeader>
+						<HeaderLeft>
+							<h3>{title}</h3>
+						</HeaderLeft>
+						<IconButton>
+							<IoMdClose onClick={onClose} size={30} />
+						</IconButton>
+					</ModalHeader>
+				)}
+
+				<ModalBody
+					id={id}
+					hasFooter={footerContent}
+					marginBottom={marginBottom}
+				>
+					{children}
+				</ModalBody>
+
+				{footerContent && (
+					<ModalFooter ref={footerRef}>{footerContent}</ModalFooter>
+				)}
+			</ModalContainer>
+		</Modal>,
+		document.getElementById("modal"),
+	);
 };
 
 Dialog.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  children: PropTypes.node.isRequired,
-  maxWidth: PropTypes.string,
-  maxHeight: PropTypes.string,
-  nodeHeaderLeft: PropTypes.node,
-  nodeHeaderRight: PropTypes.node,
-  nodeFooter: PropTypes.node,
-  title: PropTypes.string,
+	isOpen: PropTypes.bool.isRequired,
+	onClose: PropTypes.func.isRequired,
+	children: PropTypes.node.isRequired,
+	maxWidth: PropTypes.string,
+	maxHeight: PropTypes.string,
+	nodeHeaderLeft: PropTypes.node,
+	nodeHeaderRight: PropTypes.node,
+	nodeFooter: PropTypes.node,
+	title: PropTypes.string,
 };
 
 export default Dialog;

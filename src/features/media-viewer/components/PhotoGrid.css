@@ -68,7 +68,7 @@
   height: 100%;
   max-height: 700px;
   display: block;
-  object-fit: contain;
+  object-fit:cover;
   cursor: pointer;
   position: relative;
   z-index: 1;
@@ -81,6 +81,7 @@
   justify-content: center;
   align-items: center;
   color: white;
+  z-index: 400;
   gap: 0.5rem;
   font-size: 2.5rem;
   /* font-weight: 700; */

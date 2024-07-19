@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IoPersonAdd, IoArrowBackSharp } from "react-icons/io5";
+import { IoPersonAdd } from "react-icons/io5";
 import {
 	useLocation,
 	useSearchParams,
@@ -7,42 +7,39 @@ import {
 	Link,
 } from "react-router-dom";
 
-import "./Profile.css";
-import ProfileModal from "./components/ProfileModal";
+import "./profile.css";
 import Cookies from "js-cookie";
 import { HiOutlineEnvelope } from "react-icons/hi2";
 import Post from "~/features/post/components/post";
 import { Button } from "~/components/ui/button";
 import { getProfile } from "~/features/user/api/user-api";
+import useUser from "~/hooks/use-user";
+import EditProfile from "~/features/profile/components/edit-profile";
 
 const Profile = () => {
 	const location = useLocation();
 	const [searchParams] = useSearchParams();
 	let { idprofile } = useParams();
-	/*  console.log(idprofile); */
 
 	// const { idprofile, tab } = useSearchParams();
 	const [profile, setProfile] = useState({});
 
 	const fetchDataUser = async () => {
 		const response = await getProfile(idprofile, "username");
-
-		console.log(profile);
 		if (response.code === 200) {
-			setProfile(response.data.user);
+			setProfile(response.data);
 		} else {
 			setProfile(null);
 		}
 	};
 
-	console.log(profile);
 	const toggleModal = () => {
 		setIsModalOpen((prevState) => !prevState);
 	};
 
 	useEffect(() => {
 		fetchDataUser();
-	}, []);
+	}, [idprofile]);
 
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -84,20 +81,6 @@ const Profile = () => {
 			href: "/groups",
 		},
 	];
-	const [posts, setPosts] = useState([]);
-	const callApi = async () => {
-		await fetch(`http://localhost:3000/api/v1/posts/user/${idprofile}`, {
-			credentials: "include",
-		})
-			.then((res) => res.json())
-			.then((data) => {
-				setPosts(data.data);
-			})
-			.catch((err) => console.log(err));
-	};
-	useEffect(() => {
-		callApi();
-	}, []);
 
 	const Tab = () => {
 		const tab = location.pathname.split("/")[2];
@@ -113,12 +96,13 @@ const Profile = () => {
 			case "groups":
 				return <div>Groups</div>;
 			default:
-				return <Post posts={posts} setPosts={setPosts} />;
+				return <Post username={idprofile} />;
 		}
 	};
+	const user = useUser();
 	return (
 		<>
-			<ProfileModal
+			<EditProfile
 				profile={profile}
 				isModalOpen={isModalOpen}
 				setIsModalOpen={setIsModalOpen}
@@ -127,18 +111,18 @@ const Profile = () => {
 				<div className="profile__cover-image-container">
 					<div
 						style={{
-							backgroundImage: `url(${profile.cover_image_url})`,
+							backgroundImage: `url(${profile.coverImageUrl})`,
 						}}
 						className="profile__cover-image"
 					/>
 				</div>
 				<div className="profile__item">
 					<div className="profile__avatar-container">
-						<img src={profile.avatar_url} className="profile__avatar" />
+						<img src={profile.avatarUrl} className="profile__avatar" />
 						<h1 className="profile__name">{profile.name}</h1>
 					</div>
 					<div className="profile__btn-container">
-						{profile.user_id === Cookies.get("userId") ? (
+						{profile.userId === Cookies.get("userId") ? (
 							<Button onClick={toggleModal}>Setup profile</Button>
 						) : (
 							<div className="profile__connect">

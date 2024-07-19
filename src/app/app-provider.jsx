@@ -6,7 +6,6 @@ import Notification from "~/components/ui/notification/notification";
 export const AppProvider = ({ children }) => {
 	return (
 		<Suspense fallback={<div>Loading...</div>}>
-			<Notification />
 			<ContextProvider>
 				<Provider store={ReduxStore}>{children}</Provider>
 			</ContextProvider>

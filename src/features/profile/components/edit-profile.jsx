@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useRef } from "react";
 import { CSSTransition } from "react-transition-group";
-import { IoMdClose, IoMdArrowBack, IoMdArrowForward } from "react-icons/io";
+import { IoMdClose } from "react-icons/io";
 import { MdOutlineCameraAlt } from "react-icons/md";
 import Cookies from "js-cookie";
-import "./ProfileModal.css";
+import "./edit-profile.css";
 import { convertFileToDataURL } from "~/utils/utilFile";
 import CropperImage from "~/features/cropper/components/cropper-image";
 import Dialog from "~/components/ui/dialog/dialog";
@@ -15,7 +15,7 @@ import { IconButton } from "~/components/ui/button/icon-button";
 import { updateProfile } from "~/features/user/api/user-api";
 import { uploadFiles } from "~/features/post/api/uploadImage";
 
-const ProfileModal = ({ profile, isModalOpen, setIsModalOpen }) => {
+const EditProfile = ({ profile, isModalOpen, setIsModalOpen }) => {
 	const [activeMenu, setActiveMenu] = useState("main");
 
 	const [bio, setBio] = useState("");
@@ -222,7 +222,7 @@ const ProfileModal = ({ profile, isModalOpen, setIsModalOpen }) => {
 								<div
 									className="profile__cover-img-container"
 									style={{
-										backgroundImage: `url(${getSoureImageById(3) || profile.cover_image_url})`,
+										backgroundImage: `url(${getSoureImageById(3) || profile.coverImageUrl})`,
 									}}
 								>
 									<div className="profile__cover-img-blur"></div>
@@ -240,7 +240,7 @@ const ProfileModal = ({ profile, isModalOpen, setIsModalOpen }) => {
 							<div className="profile__modal-item">
 								<div className="profile__modal-avatar-container">
 									<img
-										src={getSoureImageById(2) || profile.avatar_url}
+										src={getSoureImageById(2) || profile.avatarUrl}
 										className="profile__modal-avatar"
 										alt=""
 									/>
@@ -298,4 +298,4 @@ const ProfileModal = ({ profile, isModalOpen, setIsModalOpen }) => {
 	);
 };
 
-export default ProfileModal;
+export default EditProfile;

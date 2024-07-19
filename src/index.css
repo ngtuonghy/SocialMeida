@@ -109,7 +109,7 @@ body {
   --color-green-1: #d4f7dc;
   --color-green-5: #0d894f;
 
-  --color-yellow-5: #e46a11;
+  --color-yellow-500: #e46a11;
 
   --color-red-5: #f04438;
 
@@ -174,7 +174,7 @@ a {
   transition: all var(--speed) ease;
 }
 .menu-primary-exit {
-  position: absolute;
+  /* position: absolute; */
 }
 .menu-primary-exit-active {
   transform: translateX(-110%);

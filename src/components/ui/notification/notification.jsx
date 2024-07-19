@@ -11,23 +11,26 @@ const Box = styled(Link)`
   gap: 10px;
 `;
 function CountDisplay({ dataT }) {
+	console.log(dataT.notificationUrl);
 	return (
-		<Box to={dataT.url}>
-			<Avatar src={dataT.avatar_url} />
-			<p>{dataT.text}</p>
+		<Box>
+			<Avatar src={dataT.avatarUrl} />
+			<p>{dataT.notificationData.content}</p>
 		</Box>
 	);
 }
 const Notification = () => {
 	useEffect(() => {
 		socket.on("get-notification", (data) => {
-			// console.log(data);
-			// console.log("check noti");
-			toast(<CountDisplay dataT={data.data} />, {
+			console.log(data);
+			toast(<CountDisplay dataT={data} />, {
 				position: "bottom-left",
 				closeOnClick: true,
 			});
 		});
+		return () => {
+			socket.off("get-notification");
+		};
 	}, []);
 
 	return (

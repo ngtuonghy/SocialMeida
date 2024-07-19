@@ -6,11 +6,15 @@ import { useSelector } from "react-redux";
 import AlertDialog from "~/components/ui/dialog/alert-dialog";
 import { Link } from "react-router-dom";
 import { IconButton } from "~/components/ui/button/icon-button";
-import InputItem from "./comment-input";
+import CommentForm from "./comment-form";
 import { BsThreeDots } from "react-icons/bs";
 import { socket } from "~/socket";
 import styled, { css } from "styled-components";
 import Avatar from "~/components/ui/avatar/avatar";
+import useUser from "~/hooks/use-user";
+``;
+import { MdOutlineError } from "react-icons/md";
+import { addReplied } from "../utils/add-replied";
 const SImage = styled.img`
   width: auto;
   display: block;
@@ -30,6 +34,7 @@ const Box = styled.div`
   width: 100%;
   flex-direction: column;
   position: relative;
+  gap: 5px;
 `;
 const BoxParent = styled.div`
   display: flex;
@@ -68,14 +73,13 @@ const BoxChild = styled.div`
 `;
 const BoxItem = styled.div`
   display: flex;
-  padding-bottom: 10px;
-  padding-top: 5px;
   align-content: flex-start;
   flex-direction: column;
   position: relative;
+border-radius: 10px;
   ${(props) =>
-    props.show &&
-    css`
+		props.show &&
+		css`
       &:before {
         content: "";
         display: block;
@@ -94,8 +98,8 @@ const ChildLine = styled.div`
   gap: 10px;
   position: relative;
   ${(props) =>
-    !props.show &&
-    css`
+		!props.show &&
+		css`
       &:before {
         content: "";
         height: 30px;
@@ -120,209 +124,243 @@ const Header = styled.div`
 const Content = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 5px;
   align-items: flex-start;
   width: 100%;
   position: relative;
   margin-left: 42px;
 `;
-const CommentItem = ({ comment, post, setListComment }) => {
-  const user = useSelector((state) => state.user.user);
-  const [singleComment, setSingleComment] = useState(comment);
-  const [isReply, setIsReply] = useState(false);
-  const [isShowMenu, setIsShowMenu] = useState(false);
-  const [isOpenDialog, setIsOpenDialog] = useState(false);
-  const ref = useRef(null);
 
-  const handleViewAllReply = async () => {
-    try {
-      const res = await getReplies(singleComment.comment_id);
-      if (res.code === 200) {
-        const replies = res.data;
-        singleComment.replies = replies;
-        if (singleComment.replies.length > 0) {
-          setSingleComment({ ...singleComment, replies: replies });
-        }
-      } else {
-        console.error("Failed to fetch replies.");
-      }
-    } catch (error) {
-      console.error("Error fetching replies:", error);
-    }
-  };
+const SInfoComment = styled.div`
+  font-size: 0.7rem;
+  color: var(--color-teal-6);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+const SBox = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+`;
+const CommentItem = ({ comment, post }) => {
+	const user = useUser();
+	const [singleComment, setSingleComment] = useState(comment);
+	const [isReply, setIsReply] = useState(false);
+	const [isShowMenu, setIsShowMenu] = useState(false);
+	const [isOpenDialog, setIsOpenDialog] = useState(false);
+	const ref = useRef(null);
 
-  useEffect(() => {
-    const handleReplyComment = (data) => {
-      if (data.replyComment !== singleComment.comment_id) return;
-      setSingleComment((prevDataComment) => ({
-        ...prevDataComment,
-        replies: [...(prevDataComment.replies || []), data],
-      }));
-    };
-    socket.on("replied-comment", handleReplyComment);
-    // Clean up the event listener when the component unmounts or dataComment changes
-    return () => {
-      socket.off("replied-comment", handleReplyComment);
-    };
-  }, [singleComment]);
-  // console.log(dataComment);
+	useEffect(() => {
+		setSingleComment(comment);
+	}, [comment]);
 
-  const onClickEdit = () => {
-    setIsShowMenu(false);
-  };
+	const handleViewAllReply = async () => {
+		try {
+			const res = await getReplies({
+				commentId: singleComment.commentId,
+				postId: post ? post.postId : comment.postId,
+			});
+			if (res.code === 200) {
+				const replies = res.data;
+				singleComment.replies = replies;
+				if (singleComment.replies.length > 0) {
+					setSingleComment({ ...singleComment, replies: replies });
+				}
+			} else {
+				console.error("Failed to fetch replies.");
+			}
+		} catch (error) {
+			console.error("Error fetching replies:", error);
+		}
+	};
 
-  const onClickDelete = () => {
-    setIsShowMenu(false);
-    setIsOpenDialog(true);
-  };
+	useEffect(() => {
+		const handleReplyComment = (data) => {
+			addReplied(data, singleComment.commentId, setSingleComment);
+		};
+		socket.on("replied-comment", handleReplyComment);
+		// Clean up the event listener when the component unmounts or dataComment changes
+		return () => {
+			socket.off("replied-comment", handleReplyComment);
+		};
+	}, [singleComment]);
+	// console.log(dataComment);
 
-  const deleteCommentById = async (commentId) => {
-    if (commentId === singleComment.comment_id) {
-      setSingleComment(null);
-    } else {
-      if (Array.isArray(singleComment.replies)) {
-        const newReplies = singleComment.replies.filter(
-          (reply) => reply.comment_id !== commentId,
-        );
-        setSingleComment({ ...singleComment, replies: newReplies });
-      }
-    }
-  };
+	const onClickEdit = () => {
+		setIsShowMenu(false);
+	};
 
-  const handleComfirmDelete = async () => {
-    await deleteComment(singleComment.comment_id).then((res) => {
-      if (res.code === 200) {
-        deleteCommentById(singleComment.comment_id);
-        console.log("You delete id: ", singleComment.comment_id);
-      } else {
-        console.error("Failed to delete comment");
-      }
-    });
-  };
+	const onClickDelete = () => {
+		setIsShowMenu(false);
+		setIsOpenDialog(true);
+	};
 
-  useClickOutSide(ref, () => setIsShowMenu(false));
+	const deleteCommentById = async (commentId) => {
+		if (commentId === singleComment.commentId) {
+			setSingleComment(null);
+		} else {
+			if (Array.isArray(singleComment.replies)) {
+				const newReplies = singleComment.replies.filter(
+					(reply) => reply.commentId !== commentId,
+				);
+				setSingleComment({ ...singleComment, replies: newReplies });
+			}
+		}
+	};
 
-  if (singleComment === null) return null;
-  return (
-    <Box>
-      <BoxParent>
-        <AlertDialog
-          title="Delete comment?"
-          message={"Are you sure you want to delete this comment?"}
-          isOpen={isOpenDialog}
-          setIsOpen={setIsOpenDialog}
-          onConfirm={handleComfirmDelete}
-        />
-        <BoxItem show={singleComment.reply_count > 0 || singleComment.replies}>
-          <Header>
-            <Link to={`/${singleComment.username}`}>
-              <ChildLine>
-                <Avatar
-                  to={`/${singleComment.username}`}
-                  width="32px"
-                  height="32px"
-                  src={comment.avatar_url}
-                  alt=""
-                />
-              </ChildLine>
-            </Link>
-            <SBoxUserName>
-              <Link to={`/${singleComment.username}`}>
-                <h5>{singleComment.name}</h5>
-              </Link>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  position: "relative",
-                }}
-              >
-                <IconButton onClick={() => setIsShowMenu(true)}>
-                  <BsThreeDots size={16} />
-                </IconButton>
-                {isShowMenu && (
-                  <div className="comment-actions-menu" ref={ref}>
-                    <div className="menu--item" onClick={onClickEdit}>
-                      <p>Edit</p>
-                    </div>
-                    <div className="menu--item" onClick={onClickDelete}>
-                      <p>Delete</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </SBoxUserName>
-          </Header>
-          <Content>
-            <p className="comment__text">{singleComment.text}</p>
-            {singleComment.media_url && (
-              <SImage src={singleComment.media_url} alt="" />
-            )}
-            <div className="comment_time">
-              <span className="">{formatTime2(singleComment.created_at)}</span>
-              <p>Like</p>
-              <p
-                style={{ cursor: "pointer" }}
-                onClick={() => setIsReply(!isReply)}
-              >
-                Reply
-              </p>
-            </div>
-          </Content>
-        </BoxItem>
-      </BoxParent>
-      <BoxChild show={singleComment.reply_count > 0 || singleComment.replies}>
-        {Array.isArray(singleComment.replies)
-          ? singleComment.replies.map((reply) => (
-              <CommentItem
-                key={reply.comment_id}
-                comment={reply}
-                line={false}
-              />
-            ))
-          : singleComment.reply_count > 0 && (
-              <ChildLine>
-                <p
-                  onClick={handleViewAllReply}
-                  style={{
-                    lineHeight: "1.33333",
-                    fontSize: ".9375rem",
-                    cursor: "pointer",
-                  }}
-                >
-                  View all {singleComment.reply_count} replies
-                </p>
-              </ChildLine>
-            )}
-        {isReply && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "10px",
-            }}
-          >
-            {user ? (
-              <>
-                <ChildLine>
-                  <Avatar width="32px" height="32px" src={user.avatar_url} />
-                </ChildLine>
-                <InputItem
-                  key={singleComment.comment_id}
-                  post={post}
-                  comment={singleComment}
-                  setDataReplied={setSingleComment}
-                  dataReplied={singleComment}
-                />
-              </>
-            ) : (
-              <div>Sign in to comment</div>
-            )}
-          </div>
-        )}
-      </BoxChild>
-    </Box>
-  );
+	const handleComfirmDelete = async () => {
+		await deleteComment({
+			commentId: singleComment.commentId,
+			postId: post.postId,
+		}).then((res) => {
+			if (res.code === 200) {
+				deleteCommentById(singleComment.comment_id);
+				console.log("You delete id: ", singleComment.comment_id);
+			} else {
+				console.error("Failed to delete comment");
+			}
+		});
+	};
+
+	useClickOutSide(ref, () => setIsShowMenu(false));
+
+	if (singleComment === null) return null;
+	// console.log(singleComment);
+	return (
+		<Box>
+			<BoxParent>
+				<AlertDialog
+					title="Delete comment?"
+					message={"Are you sure you want to delete this comment?"}
+					isOpen={isOpenDialog}
+					setIsOpen={setIsOpenDialog}
+					onConfirm={handleComfirmDelete}
+				/>
+				<SBox>
+					<BoxItem show={singleComment.replyCount > 0 || singleComment.replies}>
+						<Header>
+							<Link to={`/${singleComment.username}`}>
+								<ChildLine>
+									<Avatar
+										to={`/${singleComment.username}`}
+										width="32px"
+										height="32px"
+										src={comment.avatarUrl}
+										alt=""
+									/>
+								</ChildLine>
+							</Link>
+							<SBoxUserName>
+								<Link to={`/${singleComment.username}`}>
+									<h5>{singleComment.name}</h5>
+								</Link>
+								<div
+									style={{
+										display: "flex",
+										justifyContent: "center",
+										alignItems: "center",
+										position: "relative",
+									}}
+								>
+									<IconButton onClick={() => setIsShowMenu(true)}>
+										<BsThreeDots size={16} />
+									</IconButton>
+									{isShowMenu && (
+										<div className="comment-actions-menu" ref={ref}>
+											<div className="menu--item" onClick={onClickEdit}>
+												<p>Edit</p>
+											</div>
+											<div className="menu--item" onClick={onClickDelete}>
+												<p>Delete</p>
+											</div>
+										</div>
+									)}
+								</div>
+							</SBoxUserName>
+						</Header>
+						<Content>
+							<p className="comment__text">{singleComment.content}</p>
+							{singleComment.mediaUrl && (
+								<SImage src={singleComment.mediaUrl} alt="" />
+							)}
+
+							<SInfoComment>
+								{singleComment.loading ? (
+									<p>Posting</p>
+								) : (
+									<SBox>
+										{singleComment.error ? (
+											<p style={{ color: "red" }}>not successful</p>
+										) : (
+											<span className="">
+												{formatTime2(singleComment.createdAt)}
+											</span>
+										)}
+										<p>Like</p>
+										<p
+											style={{ cursor: "pointer" }}
+											onClick={() => setIsReply(!isReply)}
+										>
+											Reply
+										</p>
+									</SBox>
+								)}
+							</SInfoComment>
+						</Content>
+					</BoxItem>
+					{singleComment.error && <MdOutlineError color="red" size={20} />}
+				</SBox>
+			</BoxParent>
+			<BoxChild show={singleComment.replyCount > 0 || singleComment.replies}>
+				{Array.isArray(singleComment.replies)
+					? singleComment.replies.map((reply) => (
+							<CommentItem
+								key={reply.comment_id}
+								comment={reply}
+								line={false}
+							/>
+						))
+					: singleComment.replyCount > 0 && (
+							<ChildLine>
+								<p
+									onClick={handleViewAllReply}
+									style={{
+										lineHeight: "1.33333",
+										fontSize: ".9375rem",
+										cursor: "pointer",
+									}}
+								>
+									View all {singleComment.replyCount} replies
+								</p>
+							</ChildLine>
+						)}
+				{isReply && (
+					<div
+						style={{
+							display: "flex",
+							alignItems: "flex-start",
+							gap: "10px",
+						}}
+					>
+						{user ? (
+							<>
+								<ChildLine>
+									<Avatar width="32px" height="32px" src={user.avatarUrl} />
+								</ChildLine>
+								<CommentForm
+									key={singleComment.commentId}
+									comment={singleComment}
+									setComment={setSingleComment}
+								/>
+							</>
+						) : (
+							<div>Sign in to comment</div>
+						)}
+					</div>
+				)}
+			</BoxChild>
+		</Box>
+	);
 };
 export default CommentItem;

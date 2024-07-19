@@ -9,7 +9,11 @@ import Select from "~/components/ui/select/select";
 import Input, { InputVariants } from "~/components/ui/text-field/input";
 import { checkuser, login, register } from "../api/auth";
 import { useDispatch, useSelector } from "react-redux";
-import { closeRegisterModal, toggleAuthModal } from "../auth-slice";
+import {
+	closeRegisterModal,
+	openRegisterModal,
+	toggleAuthModal,
+} from "../auth-slice";
 
 const StyledForm = styled.form`
   margin-top: 30px;
@@ -58,7 +62,6 @@ const options = [
 
 const RegisterForm = () => {
 	const [firstRun, setFirstRun] = useState(true);
-	const [isOpen, setIsOpen] = React.useState(false);
 	const dispatch = useDispatch();
 	const { isRegisterModalOpen } = useSelector((state) => state.auth);
 	const [isShowPassword, setIsShowPassword] = React.useState(false);
@@ -119,7 +122,7 @@ const RegisterForm = () => {
 				password: registerData.password,
 			}).then((res) => {
 				if (res.code === 200) {
-					setIsOpen(false);
+					dispatch(closeRegisterModal());
 					window.location.reload();
 				}
 			});
@@ -128,6 +131,7 @@ const RegisterForm = () => {
 
 	const handeUsernameChange = (e) => {
 		const value = e.target.value;
+		console.log(value);
 		setRegisterData({ ...registerData, username: value });
 		clearTimeout(timer);
 		if (value.length < 4) {
@@ -392,7 +396,7 @@ const RegisterForm = () => {
 					<SSpan onClick={() => dispatch(toggleAuthModal())}>Sign up</SSpan>
 				</div>
 			</Dialog>
-			<Button onClick={() => dispatch(isRegisterModalOpen())}>Register</Button>
+			<Button onClick={() => dispatch(openRegisterModal())}>Register</Button>
 		</>
 	);
 };

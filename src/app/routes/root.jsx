@@ -25,6 +25,8 @@ import Input from "~/components/ui/text-field/input";
 import { FaSearch } from "react-icons/fa";
 import Avatar from "~/components/ui/avatar/avatar";
 import useUser from "~/hooks/use-user";
+import { api } from "~/lib/api-client";
+import Notification from "~/components/ui/notification/notification";
 const serverUrl = env.serverPort;
 
 const Root = () => {
@@ -64,6 +66,7 @@ const Root = () => {
 		<header
 			className={`header  ${navigation.state === "loading" ? "loading" : ""}`}
 		>
+			<Notification />
 			<nav className="header__nav">
 				<div className="header__container">
 					<Link to="/home" className="header__img">
@@ -111,7 +114,7 @@ const Root = () => {
 							<Popover
 								width="250px"
 								buttonContent={
-									<Avatar src={user.avatar_url} width="40px" height="40px" />
+									<Avatar src={user.avatarUrl} width="40px" height="40px" />
 								}
 							>
 								<Menu />
@@ -193,14 +196,7 @@ const Menu = () => {
 
 	const handleLogout = async () => {
 		try {
-			const response = await fetch(`${serverUrl}api/v1/auth/logout/`, {
-				method: "POST", // or 'PUT'
-				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-
+			const response = await api.post("/v1/auth/logout");
 			const data = await response.json();
 			if (response.status === 200) {
 				window.location.reload();
@@ -221,12 +217,12 @@ const Menu = () => {
 				onEnter={calcHeight}
 			>
 				<div>
-					<MenuItems>
-						<SLink to={`/${user.username}`}>
-							<Avatar src={user.avatar_url} width="40px" height="40px" />
+					<SLink to={`/${user.username}`}>
+						<MenuItems>
+							<Avatar src={user.avatarUrl} width="40px" height="40px" />
 							<span>{user.name}</span>
-						</SLink>
-					</MenuItems>
+						</MenuItems>
+					</SLink>
 					<Shr />
 					<MenuItems
 						leftIcon={<IoMdSettings size={25} />}

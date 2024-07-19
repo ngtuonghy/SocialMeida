@@ -6,27 +6,27 @@ import { socket } from "~/socket";
 import Cookies from "js-cookie";
 
 const AppRouter = () => {
-  const router = useMemo(() => createRouter(), []);
-  return <RouterProvider router={router} />;
+	const router = useMemo(() => createRouter(), []);
+	return <RouterProvider router={router} />;
 };
 
 const app = () => {
-  useEffect(() => {
-    const userId = Cookies.get("userId");
-    socket.on("connect", () => {
-      socket.emit("addUser", userId);
-    });
+	useEffect(() => {
+		const userId = Cookies.get("userId");
+		socket.on("connect", () => {
+			socket.emit("addUser", userId);
+		});
 
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+		return () => {
+			socket.disconnect();
+		};
+	}, []);
 
-  return (
-    <AppProvider>
-      <AppRouter />
-    </AppProvider>
-  );
+	return (
+		<AppProvider>
+			<AppRouter />
+		</AppProvider>
+	);
 };
 
 export default app;

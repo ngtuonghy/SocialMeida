@@ -6,7 +6,6 @@
 .profile {
   display: flex;
   flex-direction: column;
-  width: 600px;
   height: 100%;
   /* border: 1px solid var(--color-border); */
 }

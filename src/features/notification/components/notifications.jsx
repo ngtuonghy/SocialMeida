@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Notification from "~/features/notification/components/notification-item";
 import toastify from "~/lib/toastify";
 import { Button } from "~/components/ui/button";
-
 import { IoCheckmarkDone } from "react-icons/io5";
 import { getNotification, updateNotification } from "../api/notification-api";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -43,27 +41,29 @@ const Notifications = () => {
 	const fetch = async () => {
 		setLoading(true);
 		const res = await getNotification(
-			user.user_id,
-			filter === "all" ? true : false,
-			10,
-			0,
+			{ userId: user.userId },
+			{ isReaded: filter === "all" ? true : false, limit: 10, offset: 0 },
 		);
+
 		if (res.code === 200) {
 			setNotifications(res.data);
 			setLoading(false);
+
 			if (filter !== hasMore.filter) {
 				setHasMore({ filter: filter, more: true });
+			}
+			if (res.data.length <= 0) {
+				setHasMore({ filter: filter, more: false });
 			}
 		}
 	};
 
 	const fetchMore = async () => {
 		const res = await getNotification(
-			user.user_id,
-			filter === "all" ? true : false,
-			10,
-			offset,
+			{ userId: user.userId },
+			{ isReaded: filter === "all" ? true : false, limit: 10, offset: offset },
 		);
+
 		if (res.code === 200) {
 			setNotifications([...notifications, ...res.data]);
 			setOffset(offset + 10);
@@ -79,9 +79,12 @@ const Notifications = () => {
 		try {
 			await Promise.all(
 				notifications.map((notification) => {
-					if (notification.readed === false) {
+					if (notification.isReaded === false) {
 						// Mark the notification as read in the database
-						return updateNotification(notification.notification_id);
+						return updateNotification({
+							userId: notification.userId,
+							notificationId: notification.notificationId,
+						});
 					}
 					return Promise.resolve();
 				}),
@@ -91,7 +94,7 @@ const Notifications = () => {
 			setNotifications(
 				notifications.map((notification) => ({
 					...notification,
-					readed: true,
+					isReaded: true,
 				})),
 			);
 
@@ -108,7 +111,7 @@ const Notifications = () => {
 		// console.log(notificationId);
 		setNotifications(
 			notifications.filter(
-				(notification) => notification.notification_id !== notificationId,
+				(notification) => notification.notificationId !== notificationId,
 			),
 		);
 	};
@@ -136,7 +139,7 @@ const Notifications = () => {
 				<ActionItem>
 					<Button
 						disabled={notifications
-							.map((notification) => notification.read)
+							.map((notification) => notification.isReaded)
 							.every((read) => read === true)}
 						onClick={() => markAllAsRead(notifications)}
 						startIcon={<IoCheckmarkDone size={20} />}
@@ -149,6 +152,8 @@ const Notifications = () => {
 			</Action>
 			{loading ? (
 				<NotificationLoading />
+			) : notifications.length === 0 ? (
+				<p>You have no notifications</p>
 			) : (
 				<InfiniteScroll
 					style={{ overflow: "hidden" }}

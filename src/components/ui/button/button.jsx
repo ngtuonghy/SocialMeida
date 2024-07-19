@@ -5,19 +5,19 @@ import { LuPackageCheck, LuPackageX } from "react-icons/lu";
 
 // Define button variants enum
 const ButtonVariants = {
-  CONTAINED: "contained",
-  OUTLINED: "outlined",
-  TEXT: "text",
+	CONTAINED: "contained",
+	OUTLINED: "outlined",
+	TEXT: "text",
 };
 
 const ButtonSizes = {
-  SMALL: "small",
-  MEDIUM: "medium",
-  LARGE: "large",
+	SMALL: "small",
+	MEDIUM: "medium",
+	LARGE: "large",
 };
 
 const buttonVariants = {
-  [ButtonVariants.CONTAINED]: css`
+	[ButtonVariants.CONTAINED]: css`
     background-color: var(--color-primary-500);
     color: var(--color-white);
     border: none;
@@ -25,7 +25,7 @@ const buttonVariants = {
       background-color: var(--color-primary-600);
     }
   `,
-  [ButtonVariants.OUTLINED]: css`
+	[ButtonVariants.OUTLINED]: css`
     background-color: transparent;
     color: var(--color-primary-500);
     border: 1px solid var(--color-primary-500);
@@ -34,7 +34,7 @@ const buttonVariants = {
       background-color: var(--color-primary-50);
     }
   `,
-  [ButtonVariants.TEXT]: css`
+	[ButtonVariants.TEXT]: css`
     background-color: transparent;
     color: var(--color-primary-500);
     border: none;
@@ -45,43 +45,43 @@ const buttonVariants = {
 };
 
 const buttonSizes = {
-  [ButtonSizes.SMALL]: css`
+	[ButtonSizes.SMALL]: css`
     font-size: 14px;
     padding: 4px 12px;
   `,
-  [ButtonSizes.MEDIUM]: css`
+	[ButtonSizes.MEDIUM]: css`
     font-size: 16px;
     padding: 8px 16px;
   `,
-  [ButtonSizes.LARGE]: css`
+	[ButtonSizes.LARGE]: css`
     font-size: 18px;
     padding: 8px 20px;
   `,
 };
 const disabledStyles = (variant) => {
-  switch (variant) {
-    case ButtonVariants.CONTAINED:
-      return css`
+	switch (variant) {
+		case ButtonVariants.CONTAINED:
+			return css`
         background-color: var(--color-gray-200);
         color: var(--color-gray-400);
       `;
-    case ButtonVariants.OUTLINED:
-      return css`
+		case ButtonVariants.OUTLINED:
+			return css`
         background-color: transparent;
         color: var(--color-gray-400);
         border: 1px solid var(--color-gray-400);
       `;
-    case ButtonVariants.TEXT:
-      return css`
+		case ButtonVariants.TEXT:
+			return css`
         background-color: transparent;
         color: var(--color-gray-400);
       `;
-    default:
-      return css`
+		default:
+			return css`
         background-color: var(--color-gray-200);
         color: var(--color-gray-400);
       `;
-  }
+	}
 };
 
 const StyledButton = styled.button`
@@ -104,8 +104,8 @@ const StyledButton = styled.button`
     transform: scale(0.95);
   }
   ${({ disabled, variant }) =>
-    disabled &&
-    css`
+		disabled &&
+		css`
       ${disabledStyles(variant)}
       cursor: not-allowed;
       pointer-events: none;
@@ -113,39 +113,41 @@ const StyledButton = styled.button`
 `;
 
 const Button = ({
-  height,
-  width,
-  children,
-  onClick,
-  disabled = false,
-  variant = ButtonVariants.CONTAINED,
-  size = ButtonSizes.MEDIUM,
-  startIcon,
-  endIcon,
+	height,
+	width,
+	children,
+	onClick,
+	disabled = false,
+	variant = ButtonVariants.CONTAINED,
+	size = ButtonSizes.MEDIUM,
+	startIcon,
+	endIcon,
+	ref = null,
 }) => {
-  return (
-    <StyledButton
-      height={height || ""}
-      width={width || ""}
-      onClick={onClick}
-      disabled={disabled}
-      variant={variant}
-      size={size}
-    >
-      {startIcon && startIcon}
-      {children}
-      {endIcon && endIcon}
-    </StyledButton>
-  );
+	return (
+		<StyledButton
+			ref={ref}
+			height={height || ""}
+			width={width || ""}
+			onClick={onClick}
+			disabled={disabled}
+			variant={variant}
+			size={size}
+		>
+			{startIcon && startIcon}
+			{children}
+			{endIcon && endIcon}
+		</StyledButton>
+	);
 };
 
 Button.propTypes = {
-  children: PropTypes.node.isRequired,
-  // onClick: PropTypes.func || PropTypes.string,
-  disabled: PropTypes.bool,
-  variant: PropTypes.oneOf(Object.values(ButtonVariants)),
-  size: PropTypes.oneOf(Object.values(ButtonSizes)),
-  width: PropTypes.string,
+	children: PropTypes.node.isRequired,
+	// onClick: PropTypes.func || PropTypes.string,
+	disabled: PropTypes.bool,
+	variant: PropTypes.oneOf(Object.values(ButtonVariants)),
+	size: PropTypes.oneOf(Object.values(ButtonSizes)),
+	width: PropTypes.string,
 };
 
 export { Button, ButtonVariants, ButtonSizes };

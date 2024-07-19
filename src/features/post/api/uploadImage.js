@@ -1,11 +1,10 @@
 import env from "~/config/env";
 import { api } from "~/lib/api-client";
-const serverUrl = env.serverPort;
 
-export const signCloudinary = async (upload_preset, publicId) => {
+export const signCloudinary = async (uploadPreset, publicId) => {
 	try {
-		const res = await api.post(`/api/v1/cloudinary/signature`, {
-			upload_preset,
+		const res = await api.post(`/v1/cloudinary/signature`, {
+			uploadPreset,
 			publicId,
 		});
 		return res.data;
@@ -40,20 +39,5 @@ export const uploadFiles = async (file, preset, id) => {
 		);
 	} catch (error) {
 		console.log(error);
-	}
-};
-
-export const deleteFiles = async (publicId) => {
-	try {
-		const response = await fetch(`${serverUrl}api/v1/user/delete-image`, {
-			method: "DELETE",
-			credentials: "include",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ publicId }),
-		});
-		return await response.json();
-	} catch (error) {
-		console.error("Error deleteFiles:", error);
-		throw new Error("Failed deleteFiles");
 	}
 };

@@ -2,27 +2,23 @@ import env from "~/config/env";
 import { api } from "~/lib/api-client";
 const serverUrl = env.serverPort;
 
-export const getReplies = async (postId) => {
+export const getReplies = async (params) => {
 	try {
-		const res = await fetch(`${serverUrl}api/v1/comments/${postId}/replies`, {
-			credentials: "include",
-		}).then((res) => res.json());
-		return res;
+		const res = await api.get(
+			`/v1/posts/${params.postId}/comments/${params.commentId}/replies`,
+		);
+		return res.data;
 	} catch {
 		throw new Error("Failed to get replies");
 	}
 };
 
-export const deleteComment = async (commentId) => {
+export const deleteComment = async (params) => {
 	try {
-		const response = await fetch(`${serverUrl}api/v1/comments/${commentId}`, {
-			method: "DELETE", // or 'PUT'
-			credentials: "include",
-			headers: {
-				"Content-Type": "application/json",
-			},
-		}).then((response) => response.json());
-		return response;
+		const res = await api.delete(
+			`/v1/posts/${params.postId}/comments/${params.commentId}`,
+		);
+		res.data;
 	} catch (error) {
 		console.error("Error delete comment:", error);
 		throw new Error("Failed to delete comment");
@@ -30,32 +26,26 @@ export const deleteComment = async (commentId) => {
 };
 
 // NOTE: comment
-export const createComment = async (data) => {
+export const createComment = async (params, body) => {
 	try {
-		const response = await fetch(`${serverUrl}api/v1/comments`, {
-			method: "POST", // or 'PUT'
-			credentials: "include",
-			headers: {
-				"Content-Type": "application/json",
-			},
-
-			body: JSON.stringify(data),
-		}).then((response) => response.json());
-		// console.log("profile", profile);
-		return response;
+		const res = await api.post(`/v1/posts/${params.postId}/comments`, body);
+		return res.data;
 	} catch (error) {
 		console.error("Error create comment:", error);
 		throw new Error("Failed to create comment");
 	}
 };
 
-export const getComments = async (postId, limit = 5, offset = 0, commentId) => {
+export const getComments = async (params, query) => {
 	try {
-		const res = await api.get(`/api/v1/comments/${postId}`, {
+		const limit = query.limit || 5;
+		const offset = query.offset || 0;
+		const commentId = query.commentId || null;
+		const res = await api.get(`/v1/posts/${params.postId}/comments`, {
 			params: { limit, offset, commentId },
 		});
 		return res.data;
-	} catch {
+	} catch (error) {
 		console.error("Error get comments:", error);
 		throw new Error("Failed to get comments");
 	}

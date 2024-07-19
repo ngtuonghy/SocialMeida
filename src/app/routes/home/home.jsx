@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "./home.css";
-import { useSelector } from "react-redux";
 import Layout from "~/components/layouts/home-layout";
 import CreatePost from "~/features/post/components/create-post";
 import Post from "~/features/post/components/post";
-import { Button } from "~/components/ui/button";
 import useUser from "~/hooks/use-user";
 const Home = () => {
 	const user = useUser();
@@ -19,13 +17,10 @@ const Home = () => {
 
 	return (
 		<Layout>
-			{user && (
-				<CreatePost isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
-			)}
 			<div className="home">
 				{user && (
 					<div className="home__profile">
-						<img className="home__avatar" src={user.avatar_url} alt="" />
+						<img className="home__avatar" src={user.avatarUrl} alt="" />
 						<div
 							style={{
 								width: "100%",
@@ -40,8 +35,11 @@ const Home = () => {
 						</div>
 					</div>
 				)}
-				<Post />
 			</div>
+			{user && (
+				<CreatePost isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+			)}
+			<Post />
 		</Layout>
 	);
 };

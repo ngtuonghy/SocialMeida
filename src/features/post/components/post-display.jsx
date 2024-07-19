@@ -1,11 +1,10 @@
 import React from "react";
 import styled from "styled-components";
-import Avatar from "~/components/ui/avatar/avatar";
-import MediaViewer from "~/features/media-viewer/components/media-viewer";
-import { formatTime } from "~/utils/utilTime";
 import Comment from "~/features/comments/components/comment";
 import PostAction from "./post-action";
 import PostHeader from "./post-header";
+import MediaPost from "~/features/media-viewer/components/media-post";
+
 const Box = styled.div`
   display: block;
   position: relative;
@@ -22,22 +21,45 @@ const SBoxPadding = styled.div`
   padding: 10px;
   padding-bottom: 0;
 `;
-const PostDisplay = ({ post, scrollableTarget, setReact, react }) => {
-  if (!post) return null;
-  // console.log(post);
-  return (
-    <Box>
-      <SBoxPadding>
-        <PostHeader post={post} />
-        <Text>{post.text}</Text>
-      </SBoxPadding>
-      <MediaViewer media={post.media_urls} />
-      <SBoxPadding>
-        <PostAction post={post} setReact={setReact} react={react} />
-        <Comment post={post} scrollableTarget={scrollableTarget} />
-      </SBoxPadding>
-    </Box>
-  );
+const Line = styled.div`
+padding-bottom: 10px;
+border-bottom: 1px solid var(--color-gray-300);
+`;
+
+const PostDisplay = ({
+	post,
+	scrollableTarget,
+	setInfoVote,
+	infoVote,
+	setShowPost,
+	setPosts,
+}) => {
+	if (!post) return null;
+	return (
+		<Box>
+			<Line>
+				<SBoxPadding>
+					<PostHeader
+						post={post}
+						setShowPost={setShowPost}
+						setPosts={setPosts}
+					/>
+					<Text>{post.content}</Text>
+				</SBoxPadding>
+				<MediaPost media={post.mediaUrls} />
+				<SBoxPadding>
+					<PostAction
+						post={post}
+						setInfoVote={setInfoVote}
+						infoVote={infoVote}
+					/>
+				</SBoxPadding>
+			</Line>
+			<SBoxPadding>
+				<Comment post={post} scrollableTarget={scrollableTarget} />
+			</SBoxPadding>
+		</Box>
+	);
 };
 
 export default PostDisplay;

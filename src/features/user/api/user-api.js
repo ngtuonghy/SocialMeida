@@ -5,7 +5,7 @@ const serverUrl = env.serverPort;
 
 export const getProfile = async (identifier, userIdentifier) => {
 	try {
-		const res = await api.get(`/api/v1/users/${identifier}`, {
+		const res = await api.get(`/v1/users/${identifier}`, {
 			params: { userIdentifier },
 		});
 
@@ -18,17 +18,8 @@ export const getProfile = async (identifier, userIdentifier) => {
 
 export const updateProfile = async (profile) => {
 	try {
-		const response = await fetch(`${serverUrl}api/v1/users/updateProfile`, {
-			method: "PUT", // or 'PUT'
-			credentials: "include",
-			headers: {
-				"Content-Type": "application/json",
-			},
-
-			body: JSON.stringify(profile),
-		}).then((response) => response.json());
-		console.log("profile", profile);
-		return response;
+		const response = await api.put(`/v1/users/updateProfile`, profile);
+		return response.data;
 	} catch (error) {
 		console.error("Error updateProfile:", error);
 		throw new Error("Failed to update profile");

@@ -1,17 +1,21 @@
 import { api } from "~/lib/api-client";
 
-export const deleteNotification = async (notificationId) => {
+export const deleteNotification = async (params) => {
 	try {
-		const res = await api.delete(`/api/v1/notifications/${notificationId}`);
+		const res = await api.delete(
+			`/v1/users/${params.userId}/notifications/${params.notificationId}`,
+		);
 		return res.data;
 	} catch (error) {
 		console.error("Error delete comment:", error);
 		throw new Error("Failed to delete comment");
 	}
 };
-export const updateNotification = async (notificationId) => {
+export const updateNotification = async (params) => {
 	try {
-		const res = await api.patch(`/api/v1/notifications/${notificationId}`);
+		const res = await api.patch(
+			`/v1/users/${params.userId}/notifications/${params.notificationId}`,
+		);
 		return res.data;
 	} catch (error) {
 		console.error("Error update notification:", error);
@@ -19,9 +23,12 @@ export const updateNotification = async (notificationId) => {
 	}
 };
 // NOTE: comment
-export const createNotification = async (body) => {
+export const createNotification = async (params, body) => {
 	try {
-		const res = await api.post(`/api/v1/notifications`, body);
+		const res = await api.post(
+			`/v1/users/${params.userId}/notifications`,
+			body,
+		);
 		return res.data;
 	} catch (error) {
 		console.error("Error create comment:", error);
@@ -29,18 +36,16 @@ export const createNotification = async (body) => {
 	}
 };
 
-export const getNotification = async (
-	userId,
-	isReaded = false,
-	limit = 10,
-	offset = 0,
-) => {
+export const getNotification = async (params, query) => {
 	try {
-		const response = await api.get(`/api/v1/notifications/${userId}`, {
+		const isReaded = query.isReaded || false;
+		const limit = query.limit || 10;
+		const offset = query.offset || 0;
+		const response = await api.get(`/v1/users/${params.userId}/notifications`, {
 			params: {
-				isReaded: isReaded,
-				limit: limit,
-				offset: offset,
+				isReaded,
+				limit,
+				offset,
 			},
 		});
 		return response.data;

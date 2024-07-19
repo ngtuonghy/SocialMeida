@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import HomePage from "./home/home";
 import Layout from "~/components/layouts/home-layout";
-import Profile from "./profile/Profile";
+import Profile from "./profile/profile";
 import Trending from "./trending/trending";
 import NotificationsPage from "./notifications/notifications";
 import Messanges from "./messages/Messanges";
