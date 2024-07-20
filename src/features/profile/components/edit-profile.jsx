@@ -12,81 +12,54 @@ import { Button } from "~/components/ui/button";
 import Input from "~/components/ui/text-field/input";
 import InputMultiline from "~/components/ui/text-field/input-multiline";
 import { IconButton } from "~/components/ui/button/icon-button";
-import { updateProfile } from "~/features/user/api/user-api";
 import { uploadFiles } from "~/features/post/api/uploadImage";
+import { updateUser } from "../api/update-user";
+import useUser from "~/hooks/use-user";
+import MenuEditor from "./menu-editor";
+import { blobToBase64 } from "~/utils/utilFileToBase64";
+import pLimit from "p-limit";
 
 const EditProfile = ({ profile, isModalOpen, setIsModalOpen }) => {
-	const [activeMenu, setActiveMenu] = useState("main");
+	const [menu, setMenu] = useState("main");
 
-	const [bio, setBio] = useState("");
-	const [location, setLocation] = useState("");
-	const [website, setWebsite] = useState("");
-	const [name, setName] = useState("");
+	const [profiles, setProfiles] = useState({});
+	const [file, setFile] = useState(null);
+	const [aspectRatio, setAspectRatio] = useState(1 / 1);
+	const [menuHistory, setMenuHistory] = useState(["main"]);
 
-	const [imgEdit, setImgEdit] = useState();
+	const handleMenuChange = (newMenu) => {
+		setMenu(newMenu);
+		setMenuHistory((prevHistory) => [...prevHistory, newMenu]);
+	};
 
-	const [previewImage, setPreviewImage] = useState([]);
-	const [croppedFileCoverImg, setCroppedFileCoverImg] = useState(null);
-	const [croppedFileProfile, setCroppedFileProfile] = useState();
-	const [selectedFileId, setSelectedFileId] = useState(null);
-	const cropperRef = useRef(null);
-	const [isModalCropperOpen, setIsModalCropperOpen] = useState(false);
-
-	useEffect(() => {
-		const processImages = async () => {
-			try {
-				let file =
-					selectedFileId === 2 ? croppedFileProfile : croppedFileCoverImg;
-
-				if (!file) return;
-				const result = await convertFileToDataURL(file);
-
-				setPreviewImage(() => {
-					const existingItemIndex = previewImage.findIndex(
-						(item) => item.id === selectedFileId,
-					);
-
-					if (existingItemIndex !== -1) {
-						return previewImage.map((item) =>
-							item.id === selectedFileId
-								? { ...item, srcOrigin: result, src: "" }
-								: item,
-						);
-					} else {
-						return [
-							...previewImage,
-							{ id: selectedFileId, srcOrigin: result, src: "" },
-						];
-					}
-				});
-				setImgEdit(result);
-			} catch (error) {
-				console.error("Error previewing image:", error);
+	const handleUndo = () => {
+		setMenuHistory((prevHistory) => {
+			if (prevHistory.length > 1) {
+				const newHistory = prevHistory.slice(0, -1);
+				setMenu(newHistory[newHistory.length - 1]);
+				return newHistory;
 			}
-		};
-		processImages();
-	}, [selectedFileId]);
-
+			return prevHistory;
+		});
+	};
+	const user = useUser();
 	useEffect(() => {
-		setBio(profile.bio);
-		setLocation(profile.location);
-		setWebsite(profile.website);
-		setIsModalOpen(isModalOpen);
-		setName(profile.name);
+		setProfiles(user);
 	}, [isModalOpen]);
 
-	const handleInputProfile = (e) => {
+	const handleInputProfile = async (e) => {
 		const file = e.target.files[0];
-		setSelectedFileId(2);
-		setCroppedFileProfile(file);
-		setIsModalCropperOpen(true);
+		console.log(file);
+		setFile(URL.createObjectURL(file));
+		setAspectRatio(1 / 1);
+		handleMenuChange("editor");
 	};
 
 	const handleInputCoverImg = (e) => {
 		const file = e.target.files[0];
-		setCroppedFileCoverImg(file);
-		setSelectedFileId(3);
-		setIsModalCropperOpen(true);
+		setFile(URL.createObjectURL(file));
+		setAspectRatio(16 / 9);
+		handleMenuChange("editor");
 	};
 
 	const dropdownRef = useRef(null);
@@ -102,49 +75,62 @@ const EditProfile = ({ profile, isModalOpen, setIsModalOpen }) => {
 		setMenuHeight(height);
 	}
 
-	const handleBioChange = (event) => {
-		setBio(event.target.value);
-	};
-	const handleLocationChange = (event) => {
-		setLocation(event.target.value);
-	};
-	const handlewWebsiteChange = (event) => {
-		setWebsite(event.target.value);
-	};
-	const handleNameChange = (event) => {
-		setName(event.target.value);
-	};
-
-	const handleSaveChanges = async () => {
-		let urlProfile;
-		let urlCoverImg;
-		if (getSoureImageById(2)) {
-			await uploadFiles(
-				getSoureImageById(2),
-				"up_profile",
-				Cookies.get("userId"),
-			)
-				.then((res) => res.json())
-				.then((data) => (urlProfile = data.url));
+	const saveButtonRef = useRef(null);
+	const handleSave = () => {
+		if (saveButtonRef.current && menu === "editor") {
+			saveButtonRef.current.onClick();
+			handleUndo();
 		}
-		if (getSoureImageById(3)) {
-			await uploadFiles(
-				getSoureImageById(3),
-				"up_coverImg",
-				Cookies.get("userId"),
-			)
-				.then((res) => res.json())
-				.then((data) => (urlCoverImg = data.url));
+	};
+	const handleApply = async () => {
+		console.log("applu rin");
+		console.log(profiles);
+		let urlProfile = undefined;
+		let urlCoverImg = undefined;
+		const limit = pLimit(2);
+		const aPromise = [];
+
+		if (profiles.newAvatarUrl) {
+			aPromise.push(
+				limit(async () => {
+					const blob = await fetch(profiles.newAvatarUrl).then((res) =>
+						res.blob(),
+					);
+					const base64 = await blobToBase64(blob);
+					await uploadFiles(base64, "up_profile", Cookies.get("userId"))
+						.then((res) => res.json())
+						.then((data) => (urlProfile = data.url));
+				}),
+			);
 		}
 
-		await updateProfile({
-			avatarUrl: urlProfile,
-			coverImgUrl: urlCoverImg,
-			bio: bio,
-			location: location,
-			website: website,
-			name: name,
-		})
+		if (profiles.newCoverImageUrl) {
+			aPromise.push(
+				limit(async () => {
+					const blob = await fetch(profiles.newCoverImageUrl).then((res) =>
+						res.blob(),
+					);
+					const base64 = await blobToBase64(blob);
+					await uploadFiles(base64, "up_coverImg", Cookies.get("userId"))
+						.then((res) => res.json())
+						.then((data) => (urlCoverImg = data.url));
+				}),
+			);
+		}
+
+		const res = await Promise.all(aPromise);
+
+		await updateUser(
+			{ userId: user.userId },
+			{
+				avatarUrl: urlProfile,
+				coverImageUrl: urlCoverImg,
+				bio: profiles.bio,
+				location: profiles.location,
+				website: profiles.website,
+				name: profiles.name,
+			},
+		)
 			.then((res) => {
 				console.log(res);
 				window.location.reload();
@@ -152,52 +138,17 @@ const EditProfile = ({ profile, isModalOpen, setIsModalOpen }) => {
 			.catch((err) => {
 				console.log(err);
 			});
-
-		console.log("save changes");
-	};
-	const handleApplyChanges = () => {
-		if (activeMenu === "image") {
-			handleCropProfile();
-		}
-		if (activeMenu === "coverImage") {
-			handleCropCoverImage();
-		}
-		setActiveMenu("main");
-		// console.log("apply changes");
-	};
-	console.log(previewImage);
-
-	const getSoureImageById = (id) => {
-		const obj = previewImage.find((obj) => obj.id === id);
-		if (obj === undefined || obj.src === null) return null;
-		return obj.src;
 	};
 
 	return (
 		<>
-			<CropperImage
-				src={imgEdit || ""}
-				aspectRatio={selectedFileId === 2 ? 1 / 1 : 3 / 1}
-				cropperRef={cropperRef}
-				isModalOpen={isModalCropperOpen}
-				selectedFileId={selectedFileId}
-				setSelectedFileId={setSelectedFileId}
-				setIsModalOpen={setIsModalCropperOpen}
-				preview={previewImage}
-				setPreview={setPreviewImage}
-			/>
-
 			<Dialog
 				maxWidth="600px"
 				isOpen={isModalOpen}
 				onClose={() => setIsModalOpen(false)}
-				onBackClick={activeMenu !== "main" ? () => setActiveMenu("main") : null}
-				title={activeMenu === "main" ? "Edit Profile" : "Edit Image"}
-				onClickFooter={activeMenu === "main" ? handleSaveChanges : null}
-				onButton={activeMenu === "main" ? null : handleApplyChanges}
-				labelOnButton={"Apply"}
-				nodeHeaderRight={<Button onClick={handleSaveChanges}>Save</Button>}
-				nodeHeaderLeft={
+				onBackClick={menu !== "main" ? () => setMenu("main") : null}
+				title={menu === "main" ? "Edit Profile" : "Edit Image"}
+				headerContent={
 					<>
 						<IconButton
 							onClick={() => {
@@ -206,12 +157,17 @@ const EditProfile = ({ profile, isModalOpen, setIsModalOpen }) => {
 						>
 							<IoMdClose size={30} />{" "}
 						</IconButton>
+						{menu === "editor" ? (
+							<Button onClick={handleSave}>Save</Button>
+						) : (
+							<Button onClick={handleApply}>Apply</Button>
+						)}
 					</>
 				}
 			>
 				<div style={{ overflow: "hidden" }} ref={dropdownRef}>
 					<CSSTransition
-						in={activeMenu === "main"}
+						in={menu === "main"}
 						timeout={1}
 						unmountOnExit
 						onEnter={calcHeight}
@@ -222,7 +178,7 @@ const EditProfile = ({ profile, isModalOpen, setIsModalOpen }) => {
 								<div
 									className="profile__cover-img-container"
 									style={{
-										backgroundImage: `url(${getSoureImageById(3) || profile.coverImageUrl})`,
+										backgroundImage: `url(${profiles.newCoverImageUrl || profiles.coverImageUrl})`,
 									}}
 								>
 									<div className="profile__cover-img-blur"></div>
@@ -240,7 +196,7 @@ const EditProfile = ({ profile, isModalOpen, setIsModalOpen }) => {
 							<div className="profile__modal-item">
 								<div className="profile__modal-avatar-container">
 									<img
-										src={getSoureImageById(2) || profile.avatarUrl}
+										src={profiles.newAvatarUrl || profiles.avatarUrl}
 										className="profile__modal-avatar"
 										alt=""
 									/>
@@ -258,11 +214,13 @@ const EditProfile = ({ profile, isModalOpen, setIsModalOpen }) => {
 
 							<div className="profile__modal-feild">
 								<Input
-									value={name}
+									value={profiles.name}
 									maxLength={50}
 									variant="filled"
 									label="Name"
-									onChange={handleNameChange}
+									onChange={(e) =>
+										setProfiles({ ...profiles, name: e.target.value })
+									}
 								/>
 								<div className=" profile__modal-item--bio">
 									<InputMultiline
@@ -270,27 +228,41 @@ const EditProfile = ({ profile, isModalOpen, setIsModalOpen }) => {
 										maxLength={160}
 										variant="filled"
 										label="Bio"
-										value={bio}
-										onChange={handleBioChange}
+										value={profiles.bio}
+										onChange={(e) =>
+											setProfiles({ ...profiles, bio: e.target.value })
+										}
 									/>
 								</div>
 
 								<Input
-									value={location}
+									value={profiles.location}
 									maxLength={50}
 									variant="filled"
 									label="Location"
-									onChange={handleLocationChange}
+									onChange={(e) =>
+										setProfiles({ ...profiles, location: e.target.value })
+									}
 								/>
 								<Input
-									value={website}
+									value={profiles.website}
 									maxLength={100}
 									variant="filled"
-									onChange={handlewWebsiteChange}
+									onChange={(e) =>
+										setProfiles({ ...profiles, website: e.target.value })
+									}
 									label="Website"
 								/>
 							</div>
 						</div>
+					</CSSTransition>
+					<CSSTransition in={menu === "editor"} unmountOnExit>
+						<MenuEditor
+							setProfiles={setProfiles}
+							aspectRatio={aspectRatio}
+							file={file}
+							ref={saveButtonRef}
+						/>
 					</CSSTransition>
 				</div>
 			</Dialog>

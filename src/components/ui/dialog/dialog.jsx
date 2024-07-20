@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { IoMdClose } from "react-icons/io";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { IconButton } from "../button/icon-button";
 // import { CSSTransition } from "react-transition-group";
 
@@ -39,6 +39,7 @@ padding-bottom: ${(props) => (props.hasFooter ? "10px" : "0")};
 
   @media (min-width: 768px) {
     max-height: calc(100vh - 50px);
+height: ${(props) => (props.height ? props.height : "fit-content")};
     border-radius: var(--border-radius-large);
   }
 `;
@@ -121,6 +122,7 @@ const Dialog = ({
 	headerContent,
 	footerContent,
 	title,
+	height,
 	id,
 }) => {
 	useEffect(() => {
@@ -163,6 +165,7 @@ const Dialog = ({
 				maxWidth={maxWidth}
 				maxHeight={maxHeight}
 				hasFooter={footerContent}
+				height={height}
 			>
 				{headerContent ? (
 					<ModalHeader>{headerContent}</ModalHeader>

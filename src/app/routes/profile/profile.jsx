@@ -99,7 +99,6 @@ const Profile = () => {
 				return <Post username={idprofile} />;
 		}
 	};
-	const user = useUser();
 	return (
 		<>
 			<EditProfile

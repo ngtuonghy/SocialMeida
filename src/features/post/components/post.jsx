@@ -1,19 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./post.css";
 import { getPost } from "../api/post";
-import Dialog from "~/components/ui/dialog/dialog";
 import InfiniteScroll from "react-infinite-scroll-component";
 import styled from "styled-components";
 import PostLoading from "./post-loading";
-import CommentForm from "~/features/comments/components/comment-form";
-import Avatar from "~/components/ui/avatar/avatar";
-import PostAction from "./post-action";
-import PostHeader from "./post-header";
-import PostDisplay from "./post-display";
-import useUser from "~/hooks/use-user";
-import { Button, ButtonVariants } from "~/components/ui/button";
-import CommentsProvider from "~/features/comments/contexts/CommentsContext";
-import MediaPost from "~/features/media-viewer/components/media-post";
 import PostItem from "./post-item";
 
 const SBox = styled.div`

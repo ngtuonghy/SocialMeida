@@ -77,7 +77,7 @@ const PostItem = ({ post, setPosts }) => {
 					title={post.name + "' spost"}
 					maxWidth="700px"
 					id="scrollableDiv"
-					nodeFooter={
+					footerContent={
 						<div
 							style={{
 								display: "flex",

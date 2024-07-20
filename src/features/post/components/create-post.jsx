@@ -113,7 +113,6 @@ const CreatePost = ({ isModalOpen, setIsModalOpen }) => {
 	const handleImageChange = (e) => {
 		const files = e.target.files;
 		const newFilesArray = Array.from(files);
-
 		const newMedia = newFilesArray.map((file) => {
 			return {
 				mediaUrl: URL.createObjectURL(file),
@@ -127,6 +126,9 @@ const CreatePost = ({ isModalOpen, setIsModalOpen }) => {
 	const saveButtonRef = useRef(null);
 
 	const handleSaveEditor = () => {
+		if (menu === "editfile") {
+			handleUndo();
+		}
 		if (saveButtonRef.current) {
 			saveButtonRef.current.onClick();
 			handleUndo();
@@ -322,6 +324,7 @@ const CreatePost = ({ isModalOpen, setIsModalOpen }) => {
 				isOpen={isModalOpen}
 				headerContent={<HeaderContent />}
 				footerContent={<FooterContent />}
+				height={menu === "editor" ? "100%" : "fit-content"}
 			>
 				<div style={{ overflow: "hidden" }}>
 					<CSSTransition

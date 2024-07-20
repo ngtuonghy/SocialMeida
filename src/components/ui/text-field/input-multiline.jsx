@@ -150,7 +150,7 @@ const StyledTextarea = styled.textarea`
   font: inherit;
   text-align: left;
   outline: none;
-  overflow: ${(props) => (props.overflow ? "auto" : "hidden")};
+  overflow:auto;
   padding: 14.5px 12px;
   width: ${(props) => props.width || "100%"};
   height: ${(props) => props.height || "auto"};
