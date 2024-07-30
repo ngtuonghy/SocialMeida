@@ -4,17 +4,19 @@ import styled, { css } from "styled-components";
 import { useViewport } from "~/context/viewportContext";
 import { PiVideo, PiVideoBold } from "react-icons/pi";
 import {
-  HiOutlineBell,
-  HiOutlineMagnifyingGlass,
-  HiOutlineHome,
-  HiOutlineEnvelope,
-  HiHome,
-  HiBell,
-  HiMagnifyingGlass,
-  HiEnvelope,
-  HiMiniMagnifyingGlassCircle,
-  HiArrowTrendingUp,
-  HiOutlineArrowTrendingUp,
+	HiOutlineBell,
+	HiOutlineMagnifyingGlass,
+	HiOutlineHome,
+	HiOutlineEnvelope,
+	HiHome,
+	HiBell,
+	HiMagnifyingGlass,
+	HiEnvelope,
+	HiMiniMagnifyingGlassCircle,
+	HiArrowTrendingUp,
+	HiOutlineArrowTrendingUp,
+	HiOutlineUsers,
+	HiUsers,
 } from "react-icons/hi2";
 import { IconContext } from "react-icons";
 
@@ -39,8 +41,8 @@ const SLink = styled(Link)`
     background-color: var(--color-gray-100);
   }
   ${({ active }) =>
-    active &&
-    css`
+		active &&
+		css`
       &:after {
         content: "";
         display: block;
@@ -55,67 +57,72 @@ const SLink = styled(Link)`
     `}
 `;
 const HeaderNav = () => {
-  const params = useLocation().pathname;
-  const { width } = useViewport();
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
+	const params = useLocation().pathname;
+	const { width } = useViewport();
+	const [isSmallScreen, setIsSmallScreen] = useState(false);
 
-  const item = [
-    {
-      label: "Home",
-      href: "/home",
-      icon: params === "/home" ? <HiHome /> : <HiOutlineHome />,
-    },
-    {
-      label: "Treding",
-      href: "/trending",
-      icon:
-        params === "/trending" ? (
-          <HiArrowTrendingUp />
-        ) : (
-          <HiOutlineArrowTrendingUp />
-        ),
-    },
-    {
-      label: "videos",
-      href: "/videos",
-      icon: params === "/videos" ? <PiVideoBold /> : <PiVideo />,
-    },
-    {
-      label: "Notifications",
-      href: "/notifications",
-      icon: params === "/notifications" ? <HiBell /> : <HiOutlineBell />,
-    },
-    {
-      label: "Messages",
-      href: "/messages",
-      icon: params === "/messages" ? <HiEnvelope /> : <HiOutlineEnvelope />,
-    },
-  ];
+	const item = [
+		{
+			label: "Home",
+			href: "/home",
+			icon: params === "/home" ? <HiHome /> : <HiOutlineHome />,
+		},
+		{
+			label: "Friends",
+			href: "/friends",
+			icon: params === "/friends" ? <HiUsers /> : <HiOutlineUsers />,
+		},
+		{
+			label: "Treding",
+			href: "/trending",
+			icon:
+				params === "/trending" ? (
+					<HiArrowTrendingUp />
+				) : (
+					<HiOutlineArrowTrendingUp />
+				),
+		},
+		// {
+		// 	label: "videos",
+		// 	href: "/videos",
+		// 	icon: params === "/videos" ? <PiVideoBold /> : <PiVideo />,
+		// },
+		{
+			label: "Notifications",
+			href: "/notifications",
+			icon: params === "/notifications" ? <HiBell /> : <HiOutlineBell />,
+		},
+		// {
+		// 	label: "Messages",
+		// 	href: "/messages",
+		// 	icon: params === "/messages" ? <HiEnvelope /> : <HiOutlineEnvelope />,
+		// },
+	];
 
-  useEffect(() => {
-    width < 650 ? setIsSmallScreen(true) : setIsSmallScreen(false);
-  }, [width]);
-  if (isSmallScreen) {
-    return null;
-  }
-  return (
-    <SBox>
-      {item.map((items, index) => (
-        <SLink active={items.href === params} key={index} to={items.href}>
-          <IconContext.Provider
-            value={{
-              style: {
-                color: `${items.href === params ? "var(--color-primary-500)" : "black"}`,
-                fontSize: "30px",
-              },
-            }}
-          >
-            {items.icon}
-          </IconContext.Provider>
-        </SLink>
-      ))}
-    </SBox>
-  );
+	useEffect(() => {
+		width < 650 ? setIsSmallScreen(true) : setIsSmallScreen(false);
+	}, [width]);
+	if (isSmallScreen) {
+		return null;
+	}
+	return (
+		<SBox>
+			{item.map((items, index) => (
+				<SLink active={items.href === params} key={index} to={items.href}>
+					<IconContext.Provider
+						value={{
+							style: {
+								color: `${items.href === params ? "var(--color-primary-500)" : "black"}`,
+								fontSize: "30px",
+							},
+						}}
+					>
+						{items.icon}
+					</IconContext.Provider>
+				</SLink>
+			))}
+		</SBox>
+	);
 };
 
 export default HeaderNav;

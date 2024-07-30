@@ -67,7 +67,6 @@ const PostItem = ({ post, setPosts }) => {
 			</BoxHidden>
 		);
 	}
-
 	return (
 		<>
 			<CommentsProvider>
@@ -77,37 +76,6 @@ const PostItem = ({ post, setPosts }) => {
 					title={post.name + "' spost"}
 					maxWidth="700px"
 					id="scrollableDiv"
-					footerContent={
-						<div
-							style={{
-								display: "flex",
-								width: "100%",
-								gap: "10px",
-								alignItems: "start",
-							}}
-						>
-							{user ? (
-								<div
-									style={{
-										display: "flex",
-										width: "100%",
-										gap: "10px",
-										alignItems: "start",
-									}}
-								>
-									<Avatar
-										width="32px"
-										height="32px"
-										src={user.avatarUrl}
-										size={40}
-									/>
-									<CommentForm post={post} />
-								</div>
-							) : (
-								<div>Sign in to comment</div>
-							)}
-						</div>
-					}
 				>
 					<PostDisplay
 						isModalOpen={isModalOpen}
@@ -129,7 +97,7 @@ const PostItem = ({ post, setPosts }) => {
 					/>
 					<Text>{post.content}</Text>
 				</SBoxPadding>
-				<MediaPost media={post.mediaUrls} />
+				<MediaPost media={post.mediaUrls} postId={post.postId} />
 				<SBoxPadding>
 					<PostAction
 						post={post}

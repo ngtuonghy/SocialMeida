@@ -5,6 +5,8 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import styled from "styled-components";
 import PostLoading from "./post-loading";
 import PostItem from "./post-item";
+import { useDispatch, useSelector } from "react-redux";
+import { setHasMore, setOffset, setPost } from "../postSlice";
 
 const SBox = styled.div`
   display: flex;
@@ -15,29 +17,19 @@ const SBox = styled.div`
 `;
 const Post = ({ username = null }) => {
 	const [isModalEditPostOpen, setIsModalEditPostOpen] = useState(false);
-	const [offset, setOffset] = useState(0);
-	const [posts, setPosts] = useState([]);
-	const [hasMore, setHasMore] = useState(true); // Add hasMore state
 
-	useEffect(() => {
-		const fetchPost = async () => {
-			await getPost(5, offset, username).then((res) => {
-				if (res.code === 200) {
-					setPosts(res.data);
-					setOffset(offset + 5);
-				}
-			});
-		};
-		fetchPost();
-	}, []);
+	const dispatch = useDispatch();
+	const posts = useSelector((state) => state.posts.data);
+	const offset = useSelector((state) => state.posts.offset);
+	const hasMore = useSelector((state) => state.posts.hasMore);
 
 	const fetchMoreData = async () => {
 		await getPost(5, offset, username).then((res) => {
 			if (res.code === 200) {
-				setPosts([...posts, ...res.data]);
-				setOffset(offset + 5);
+				dispatch(setPost([...posts, ...res.data]));
+				dispatch(setOffset(offset + 5));
 				if (res.data.length <= 0) {
-					setHasMore(false);
+					dispatch(setHasMore(false));
 				}
 			}
 		});
@@ -57,7 +49,7 @@ const Post = ({ username = null }) => {
 				<SBox>
 					{Array.isArray(posts) &&
 						posts.map((post, index) => (
-							<PostItem key={index} post={post} setPosts={setPosts} />
+							<PostItem key={index} post={post} /* setPosts={setPosts} */ />
 						))}
 				</SBox>
 			</InfiniteScroll>

@@ -46,7 +46,7 @@ const PostDisplay = ({
 					/>
 					<Text>{post.content}</Text>
 				</SBoxPadding>
-				<MediaPost media={post.mediaUrls} />
+				<MediaPost media={post.mediaUrls} postId={post.postId} />
 				<SBoxPadding>
 					<PostAction
 						post={post}

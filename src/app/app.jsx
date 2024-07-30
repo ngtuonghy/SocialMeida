@@ -1,13 +1,17 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AppProvider } from "./app-provider";
 import { createRouter } from "./routes";
+
 import { RouterProvider } from "react-router-dom";
 import { socket } from "~/socket";
 import Cookies from "js-cookie";
 
 const AppRouter = () => {
 	const router = useMemo(() => createRouter(), []);
-	return <RouterProvider router={router} />;
+
+	return (
+		<RouterProvider router={router} fallbackElement={<div>Loading</div>} />
+	);
 };
 
 const app = () => {

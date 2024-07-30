@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import {
 	Link,
 	Outlet,
+	Route,
+	Routes,
 	ScrollRestoration,
+	useLocation,
 	useNavigation,
 } from "react-router-dom";
 import reactLogo from "~/assets/react.svg";
@@ -19,7 +22,6 @@ import { CSSTransition } from "react-transition-group";
 import styled from "styled-components";
 import { IoIosLogOut, IoMdArrowBack, IoMdSettings } from "react-icons/io";
 import { AiOutlineRight } from "react-icons/ai";
-import env from "~/config/env";
 import HeaderNav from "~/features/header/components/header-nav";
 import Input from "~/components/ui/text-field/input";
 import { FaSearch } from "react-icons/fa";
@@ -27,7 +29,15 @@ import Avatar from "~/components/ui/avatar/avatar";
 import useUser from "~/hooks/use-user";
 import { api } from "~/lib/api-client";
 import Notification from "~/components/ui/notification/notification";
-const serverUrl = env.serverPort;
+import { setHasMore, setOffset, setPost } from "~/features/post/postSlice";
+import { getPost } from "~/features/post/api/post";
+import PhotosRoute from "./home/children/photos";
+
+const LocationLayout = () => {
+	let location = useLocation();
+	const { backgroundLocation } = location.state || {};
+	return <Outlet context={{ backgroundLocation }} />;
+};
 
 const Root = () => {
 	const dispatch = useDispatch();
@@ -36,7 +46,23 @@ const Root = () => {
 	const navigation = useNavigation();
 	const [isHidden, setIsHidden] = useState(false);
 	const { width } = useViewport();
+
 	const loading = useSelector((state) => state.user.loading);
+	const offset = useSelector((state) => state.posts.offset);
+	useEffect(() => {
+		const fetchPost = async () => {
+			await getPost(5, offset).then((res) => {
+				if (res.code === 200) {
+					dispatch(setPost(res.data));
+					dispatch(setOffset(offset + 5));
+				}
+			});
+		};
+		fetchPost();
+		return () => {
+			console.log("home unmount");
+		};
+	}, []);
 
 	const changeLanguageHandler = () => {
 		i18n.changeLanguage("vi");
@@ -123,7 +149,19 @@ const Root = () => {
 					)}
 				</div>
 			</nav>
-			<Outlet />
+			<ScrollRestoration
+				getKey={(location, matches) => {
+					const paths = ["/home"];
+					return paths.includes(location.pathname)
+						? // home and notifications restore by pathname
+							location.pathname
+						: // everything else by location like the browser
+							location.key;
+				}}
+			/>
+
+			{/* <Outlet /> */}
+			<LocationLayout />
 		</header>
 	);
 };

@@ -24,12 +24,17 @@ import PickerEmoji from "~/lib/picker-emoji";
 import useUser from "~/hooks/use-user";
 import { uploadFiles } from "../api/uploadImage";
 import MediaPreview from "~/features/media-viewer/components/media-preview";
-import styled, { css } from "styled-components";
+import styled, { css as ncss } from "styled-components";
 import MenuEditor from "./menu-editor";
 import { BsArrowLeftCircle, BsArrowRightCircle } from "react-icons/bs";
 import { blobToBase64, getBase64 } from "~/utils/utilFileToBase64";
 import pLimit from "p-limit";
 import PostItem from "./post-item";
+import { Box, Circle, HStack } from "@panda-css/jsx";
+import { VStack } from "@panda-css/jsx/vstack";
+import { IconContext } from "react-icons";
+import { FontWeight } from "@cloudinary/url-gen/qualifiers";
+import { css } from "@panda-css/css/css";
 const BoxHeader = styled.div`
 display: flex;
 justify-content: space-between;
@@ -53,21 +58,21 @@ align-items: center;
 cursor: pointer;
 ${(props) =>
 	props.disabled &&
-	css`
+	ncss`
   color: gray;
   pointer-events: none;
   opacity: 0.5;
   cursor:initial;
 `}
 `;
+
 const CreatePost = ({ isModalOpen, setIsModalOpen }) => {
 	const user = useUser();
 	if (user === null) return null;
-
 	const [content, setContent] = useState("");
 	const [privacy, setPrivacy] = useState("public");
 	const [menu, setMenu] = useState("main");
-	const [menuHistory, setMenuHistory] = useState(["main"]);
+	const [_, setMenuHistory] = useState(["main"]);
 	const [posts, setPosts] = useState([]);
 
 	const onTextChange = (e) => {
@@ -90,21 +95,24 @@ const CreatePost = ({ isModalOpen, setIsModalOpen }) => {
 		});
 	};
 
-	const itemsPrivacy = [
+	const Privacy = [
 		{
 			icon: <MdPublic />,
 			label: "Public",
 			value: "public",
+			description: "Anyone can see your post",
 		},
 		{
 			icon: <MdLock />,
 			label: "Only me",
 			value: "private",
+			description: "Only you can see your post",
 		},
 		{
 			icon: <FaUserGroup />,
 			label: "Friends",
 			value: "friends",
+			description: "Only your friends can see your post",
 		},
 	];
 
@@ -126,6 +134,11 @@ const CreatePost = ({ isModalOpen, setIsModalOpen }) => {
 	const saveButtonRef = useRef(null);
 
 	const handleSaveEditor = () => {
+		if (menu === "custom") {
+			//TODO: Implement this
+			// console.log("is click");
+			handleUndo();
+		}
 		if (menu === "editfile") {
 			handleUndo();
 		}
@@ -227,9 +240,11 @@ const CreatePost = ({ isModalOpen, setIsModalOpen }) => {
 					onClick={() => {
 						if (menu === "main") {
 							setIsModalOpen(false);
-							// setMedia([]);
+							setMedia([]);
 							setContent("");
 						} else {
+							// console.log("is click");
+							// console.log(menu);
 							handleUndo();
 						}
 					}}
@@ -355,11 +370,11 @@ const CreatePost = ({ isModalOpen, setIsModalOpen }) => {
 											gap: "5px",
 										}}
 										onClick={() => {
-											setMenu("custom");
+											handleMenuChange("custom");
 										}}
 									>
-										{itemsPrivacy.find((item) => item.value === privacy).icon}
-										{itemsPrivacy.find((item) => item.value === privacy).label}
+										{Privacy.find((item) => item.value === privacy).icon}
+										{Privacy.find((item) => item.value === privacy).label}
 									</div>
 								</div>
 							</div>
@@ -399,7 +414,7 @@ const CreatePost = ({ isModalOpen, setIsModalOpen }) => {
 									</Button>
 									<IconButton
 										onClick={() => {
-											setPreview([]);
+											setMedia([]);
 										}}
 										backgroundColor="var(--color-gray-200)"
 									>
@@ -417,7 +432,7 @@ const CreatePost = ({ isModalOpen, setIsModalOpen }) => {
 						unmountOnExit
 						classNames="menu-secondary"
 					>
-						<div className="create-post-container">
+						<Box p="2">
 							<p>
 								Who can see your post?
 								<br />
@@ -425,14 +440,63 @@ const CreatePost = ({ isModalOpen, setIsModalOpen }) => {
 								results. Your default audience is set to Public, but you can
 								change the audience of this specific post.
 							</p>
-							{/*TODO: create inputCustom*/}
-							{/* <InputRadio */}
-							{/*   name="privacy" */}
-							{/*   items={itemsPrivacy} */}
-							{/*   value={valueRadio} */}
-							{/*   onChange={handleRadioChange} */}
-							{/* /> */}
-						</div>
+							{Privacy.map((item) => {
+								return (
+									<HStack
+										onClick={() => {
+											setPrivacy(item.value);
+											console.log(privacy);
+										}}
+										p="2"
+										justifyContent={"space-between"}
+										borderRadius="10"
+										transition="background-color 0.3s"
+										_hover={{
+											bg: "gray.200",
+										}}
+									>
+										<HStack>
+											<IconContext.Provider value={{ size: "40px" }}>
+												{item.icon}
+											</IconContext.Provider>
+											<VStack alignItems="start" gap="0">
+												<span className={css({ fontWeight: 600 })}>
+													{item.label}
+												</span>
+												<span
+													className={css({
+														fontSize: "13px",
+													})}
+												>
+													{item.description}
+												</span>
+											</VStack>
+										</HStack>
+										<Circle
+											size="6"
+											border="1px solid"
+											borderColor={
+												privacy === item.value ? "primary.500" : "gray.300"
+											}
+											position="relative"
+											_after={{
+												content: '""',
+												position: "absolute",
+												top: "50%",
+												left: "50%",
+												width: "70%",
+												height: "70%",
+												bg: "primary.500",
+												borderRadius: "50%",
+												transform: "translate(-50%, -50%)",
+												visibility:
+													privacy === item.value ? "visible" : "hidden",
+											}}
+										/>
+									</HStack>
+								);
+							})}
+						</Box>
 					</CSSTransition>
 
 					<CSSTransition
@@ -492,7 +556,7 @@ align-items: center;
 background-color: #eeeeee;
 margin: auto;
 ${(props) => {
-	return css`
+	return ncss`
 background-image: url(${props.media.mediaUrl});
 `;
 }} 

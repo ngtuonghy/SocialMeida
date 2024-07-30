@@ -35,13 +35,13 @@ const BoxAction = styled.div`
           right: 0;
         `};
 `;
-const CommentForm = ({ post, comment, setComment }) => {
-	const { setComments } = useComments();
+const CommentForm = ({ post, comment, setComment, setComments }) => {
 	const user = useUser();
 	const [dataInput, setDataInput] = useState({
 		text: "",
 		media: { url: null, type: null, file: null },
 	});
+
 	const { width } = useViewport();
 	const fileInputRef = useRef(null);
 

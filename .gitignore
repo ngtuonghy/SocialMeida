@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 *.env
+
+## Panda
+styled-system
+styled-system-studio

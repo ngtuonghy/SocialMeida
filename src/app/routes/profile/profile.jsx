@@ -15,6 +15,7 @@ import { Button } from "~/components/ui/button";
 import { getProfile } from "~/features/user/api/user-api";
 import useUser from "~/hooks/use-user";
 import EditProfile from "~/features/profile/components/edit-profile";
+import { addFriend } from "~/features/profile/api/update-user";
 
 const Profile = () => {
 	const location = useLocation();
@@ -99,6 +100,10 @@ const Profile = () => {
 				return <Post username={idprofile} />;
 		}
 	};
+	const user = useUser();
+	const handleAddFriend = async () => {
+		await addFriend({ userId: user.userId, friendId: profile.userId });
+	};
 	return (
 		<>
 			<EditProfile
@@ -128,7 +133,7 @@ const Profile = () => {
 								<div className="profile__icon">
 									<HiOutlineEnvelope size={25} />
 								</div>
-								<Button variant="outlined">
+								<Button variant="outlined" onClick={handleAddFriend}>
 									<IoPersonAdd size={20} /> add friend
 								</Button>
 							</div>

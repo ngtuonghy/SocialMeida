@@ -1,15 +1,23 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import styled from "styled-components";
 import Avatar from "~/components/ui/avatar/avatar";
 import { IconButton } from "~/components/ui/button/icon-button";
 import { formatTime } from "~/utils/utilTime";
 import { Link } from "react-router-dom";
-import { MdOutlineDelete, MdOutlineModeEdit } from "react-icons/md";
+import {
+	MdLock,
+	MdOutlineDelete,
+	MdOutlineModeEdit,
+	MdPublic,
+} from "react-icons/md";
 import { deletePost } from "../api/post";
 import Popover from "~/components/ui/pop-over/pop-over";
 import { IoEyeOffOutline } from "react-icons/io5";
 import Cookies from "js-cookie";
+import { css } from "@panda-css/css";
+import { HStack, VStack } from "@panda-css/jsx";
+import { FaUserFriends } from "react-icons/fa";
 
 const BoxHeader = styled.div`
   display: flex;
@@ -22,12 +30,7 @@ const BoxItemHeader = styled.div`
   align-items: start;
   flex-direction: column;
 `;
-const SLink = styled(Link)`
-  text-decoration: none;
-  color: black;
-  font-size: 15px;
-  font-weight: 600;
-`;
+
 const Time = styled.p`
   font-size: 12px;
 `;
@@ -43,13 +46,36 @@ const PostHeader = ({ post, setShowPost, setPosts }) => {
 		postAction === e ? setPostAction(null) : setPostAction(e);
 	};
 
+	const Privacy = useCallback(({ privacy }) => {
+		switch (privacy) {
+			case "private":
+				return <MdLock />;
+			case "friends":
+				return <FaUserFriends />;
+			default:
+				return <MdPublic />;
+		}
+	});
 	return (
 		<BoxHeader>
 			<BoxLeft>
 				<Avatar src={post.avatarUrl} to={`/${post.username}`} />
 				<BoxItemHeader>
-					<SLink to={`/${post.username}`}>{post.name}</SLink>
-					<Time>{formatTime(post.createdAt)}</Time>
+					<Link
+						className={css({
+							textDecoration: "none",
+							alignItems: "center",
+							fontWeight: 600,
+							fontSize: "17px",
+						})}
+						to={`/${post.username}`}
+					>
+						{post.name}
+					</Link>
+					<HStack gap={"1"}>
+						<Time>{formatTime(post.createdAt)}</Time>
+						<Privacy privacy={post.privacy} />
+					</HStack>
 				</BoxItemHeader>
 			</BoxLeft>
 			<IconButton onClick={() => handleThreeDots(!postAction)}>
@@ -68,6 +94,7 @@ const PostHeader = ({ post, setShowPost, setPosts }) => {
 };
 
 export default PostHeader;
+
 const Item = styled.div`
   display: flex;
   align-items: center;

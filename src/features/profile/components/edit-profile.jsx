@@ -5,8 +5,6 @@ import { IoMdClose } from "react-icons/io";
 import { MdOutlineCameraAlt } from "react-icons/md";
 import Cookies from "js-cookie";
 import "./edit-profile.css";
-import { convertFileToDataURL } from "~/utils/utilFile";
-import CropperImage from "~/features/cropper/components/cropper-image";
 import Dialog from "~/components/ui/dialog/dialog";
 import { Button } from "~/components/ui/button";
 import Input from "~/components/ui/text-field/input";
@@ -83,8 +81,6 @@ const EditProfile = ({ profile, isModalOpen, setIsModalOpen }) => {
 		}
 	};
 	const handleApply = async () => {
-		console.log("applu rin");
-		console.log(profiles);
 		let urlProfile = undefined;
 		let urlCoverImg = undefined;
 		const limit = pLimit(2);
@@ -132,7 +128,7 @@ const EditProfile = ({ profile, isModalOpen, setIsModalOpen }) => {
 			},
 		)
 			.then((res) => {
-				console.log(res);
+				// cosole.log(res);
 				window.location.reload();
 			})
 			.catch((err) => {

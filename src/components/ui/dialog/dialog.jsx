@@ -10,7 +10,7 @@ const Modal = styled.div`
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.7);
-  z-index: 1001;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -98,21 +98,6 @@ const ModalFooter = styled.footer`
   }
 `;
 
-const ContainerIcon = styled.div`
-  border-radius: var(--border-radius-rounded);
-  background-color: #eeeeee;
-  padding: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s;
-
-  &:hover {
-    cursor: pointer;
-    background-color: var(--color-primary);
-  }
-`;
-
 const Dialog = ({
 	isOpen,
 	onClose,
@@ -143,14 +128,16 @@ const Dialog = ({
 		};
 
 		if (isOpen) {
-			// document.body.style.overflowY = "hidden";
+			document.body.style.position = "fixed";
+			document.body.style.width = "100%";
 			updateMarginBottom();
 			const resizeObserver = new ResizeObserver(updateMarginBottom);
 			if (footerRef.current) {
 				resizeObserver.observe(footerRef.current);
 			}
 			return () => {
-				// document.body.style.overflowY = "";
+				document.body.style.position = "static";
+				document.body.style.width = "auto";
 				if (footerRef.current) {
 					resizeObserver.unobserve(footerRef.current);
 				}

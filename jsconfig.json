@@ -1,13 +1,15 @@
 {
-  "compilerOptions": {
-    "plugins": [
-      {
-        "name": "@styled/typescript-styled-plugin"
-      }
-    ],
-    "baseUrl": ".",
-    "paths": {
-      "~/*": ["./src/*"]
-    }
-  }
+	"compilerOptions": {
+		"plugins": [
+			{
+				"name": "@styled/typescript-styled-plugin"
+			}
+		],
+		"baseUrl": ".",
+		"paths": {
+			"~/*": ["./src/*"],
+			"@panda-css/*": ["./styled-system/*"]
+		}
+	},
+	"include": ["src", "styled-system"]
 }

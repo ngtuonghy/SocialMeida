@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { Outlet, useParams, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
-import { getPostById } from "~/features/post/api/post";
-
+import { getOnePost } from "~/features/post/api/get-post";
 import PostDisplay from "~/features/post/components/post-display";
+
 const Text = styled.p`
   font-size: 15px;
   margin-top: 5px;
@@ -13,22 +13,40 @@ const PostPage = () => {
 	const { postId } = useParams();
 	const [searchParams] = useSearchParams();
 	const [post, setPost] = useState({});
-	const [react, setReact] = useState(null);
+	const [infoVote, setInfoVote] = useState({
+		vote: null,
+		voteCount: null,
+	});
 	useEffect(() => {
 		fetchMoreData();
 	}, [postId]);
-	console.log(postId);
+
 	const fetchMoreData = async () => {
-		await getPostById(postId).then((res) => {
+		await getOnePost(postId).then((res) => {
 			if (res.code === 200 && res.data !== null) {
 				setPost(res.data);
 			}
 		});
 	};
+	useEffect(() => {
+		if (post) {
+			setInfoVote({
+				vote: post.userVote,
+				voteCount: post.voteCount,
+			});
+		}
+	}, [post]);
 
-	if (!post) return <div>khong co </div>;
+	if (!post) return <div> 404 not found </div>;
 
-	return <PostDisplay post={post} setReact={setReact} react={react} />;
+	// console.log(post);
+
+	return (
+		<>
+			<PostDisplay post={post} setInfoVote={setInfoVote} infoVote={infoVote} />
+			<Outlet />
+		</>
+	);
 };
 
 export default PostPage;

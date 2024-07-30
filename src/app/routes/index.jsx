@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { Outlet, createBrowserRouter, useLocation } from "react-router-dom";
 import HomePage from "./home/home";
 import Layout from "~/components/layouts/home-layout";
 import Profile from "./profile/profile";
@@ -9,6 +9,9 @@ import Videos from "./videos/videos";
 import PostPage from "./post/post-page";
 import Root from "./root";
 import ErrorPage from "~/components/errors/error-page";
+import FriendsRoute from "./friends/friends";
+import PhotosRoute from "./home/children/photos";
+
 export const createRouter = () =>
 	createBrowserRouter([
 		{
@@ -20,14 +23,20 @@ export const createRouter = () =>
 					path: "/home",
 					element: <HomePage />,
 				},
+
 				{
-					path: "/notifications",
+					path: "friends",
+					element: <FriendsRoute />,
+				},
+				{
+					path: "notifications",
 					element: (
 						<Layout>
 							<NotificationsPage />
 						</Layout>
 					),
 				},
+
 				{
 					path: "/trending",
 					element: (
@@ -56,13 +65,26 @@ export const createRouter = () =>
 						</Layout>
 					),
 				},
+
 				{
-					path: "/posts/:postId",
+					path: "posts/:postId",
 					element: (
 						<Layout>
 							<PostPage />
 						</Layout>
 					),
+					// children: [
+					// 	{
+					// 		path: "photos/:photoId",
+					//
+					// 		element: <PhotosRoute />,
+					// 	},
+					// ],
+				},
+				{
+					path: "posts/:postId/photos/:photoId",
+					element: <PhotosRoute />,
+					// Component: PhotosRoute,
 				},
 			],
 		},

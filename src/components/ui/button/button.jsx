@@ -1,7 +1,6 @@
 import React from "react";
 import styled, { css, keyframes } from "styled-components";
 import PropTypes from "prop-types";
-import { LuPackageCheck, LuPackageX } from "react-icons/lu";
 
 // Define button variants enum
 const ButtonVariants = {

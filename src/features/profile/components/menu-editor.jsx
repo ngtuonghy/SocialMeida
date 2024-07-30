@@ -2,7 +2,6 @@ import styled, { css } from "styled-components";
 import { useState, useCallback, useImperativeHandle, forwardRef } from "react";
 import Cropper from "react-easy-crop";
 import { MdZoomIn, MdZoomOut } from "react-icons/md";
-
 import getCroppedImg from "~/helpers/crop-image";
 
 const Box = styled.div`
@@ -19,36 +18,6 @@ position: relative;
 max-width: 100%;
 height: 500px;
 `;
-const BoxMenu = styled.div`
-  display: flex;
-position:relative;
-`;
-
-const MenuItem = styled.div`
-width:100%;
-display:flex;
-padding:10px;
-justify-content:center;
-align-self: center;
-&:hover {
-  background-color:var(--color-gray-100)
-}
-position:relative;
-${({ active }) =>
-	active &&
-	css`
-&:after{
-content:"";
-position:absolute;
-width:40%;
-height:4px;
-bottom:1px;
-background-color:var(--color-primary-500);
-border-radius:999px;
-}
-`}
-
-`;
 
 const Toolbar = styled.div`
   display: flex;
@@ -57,11 +26,7 @@ gap:10px;
 margin-top:auto;
 width:100%;
 `;
-const BoxCrop = styled.div`
-display: flex;
-justify-content: space-around;
-flex:50%;
-`;
+
 const BoxZom = styled.div`
 display: flex;
 flex:50%;
@@ -70,19 +35,6 @@ justify-content: center;
 gap:5px;
 `;
 
-const BoxImg = styled.div`
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow: hidden;
-    touch-action: none;
-    cursor: move;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`;
 const MenuEditor = forwardRef(
 	({ setProfiles, file, aspectRatio = 1 / 1 }, ref) => {
 		const [crop, setCrop] = useState({ x: 0, y: 0 });

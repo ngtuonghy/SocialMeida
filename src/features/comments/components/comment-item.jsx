@@ -143,7 +143,7 @@ const SBox = styled.div`
   gap: 10px;
   align-items: center;
 `;
-const CommentItem = ({ comment, post }) => {
+const CommentItem = ({ comment, post, setComments }) => {
 	const user = useUser();
 	const [singleComment, setSingleComment] = useState(comment);
 	const [isReply, setIsReply] = useState(false);
@@ -352,6 +352,7 @@ const CommentItem = ({ comment, post }) => {
 									key={singleComment.commentId}
 									comment={singleComment}
 									setComment={setSingleComment}
+									setComments={setComments}
 								/>
 							</>
 						) : (
